@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hunting Log — Hunt Detail</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .detail-wrap {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 28px 24px 60px;
+    }
+
+    /* Hero */
+    .hero {
+      border-radius: var(--radius);
+      overflow: hidden;
+      margin-bottom: 20px;
+      position: relative;
+      background: var(--surface-2);
+      box-shadow: var(--shadow);
+    }
+    .hero-img {
+      width: 100%;
+      max-height: 420px;
+      object-fit: cover;
+      display: block;
+    }
+    .hero-no-photo {
+      height: 180px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 4rem;
+      background: linear-gradient(135deg, #e8f2e0 0%, #f4f5f0 100%);
+    }
+    .hero-overlay {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      padding: 24px 22px 18px;
+      background: linear-gradient(transparent, rgba(0,0,0,.55));
+      color: #fff;
+    }
+    .hero-overlay .animal-name {
+      font-family: 'Oswald', sans-serif;
+      font-size: 2rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+      line-height: 1.1;
+      text-shadow: 0 1px 6px rgba(0,0,0,.4);
+    }
+    .hero-overlay .hero-meta {
+      font-size: .8rem;
+      opacity: .85;
+      margin-top: 4px;
+    }
+
+    /* Info grid */
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .info-cell {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 14px 16px;
+      box-shadow: var(--shadow);
+    }
+    .info-cell-label {
+      font-size: .65rem;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 4px;
+    }
+    .info-cell-value {
+      font-size: .92rem;
+      font-weight: 600;
+      color: var(--text);
+      line-height: 1.3;
+    }
+
+    /* Notes */
+    .notes-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px 20px;
+      margin-bottom: 20px;
+      box-shadow: var(--shadow);
+    }
+    .notes-card p {
+      font-size: .87rem;
+      color: var(--text-muted);
+      line-height: 1.7;
+      white-space: pre-wrap;
+    }
+    .notes-empty { font-style: italic; color: var(--text-dim) !important; }
+
+    /* Photo gallery */
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 10px;
+    }
+    .gallery-item {
+      aspect-ratio: 1;
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      transition: transform var(--transition), box-shadow var(--transition);
+    }
+    .gallery-item:hover { transform: scale(1.03); box-shadow: var(--shadow-lg); }
+    .gallery-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+    /* Mini map */
+    #mini-map {
+      height: 280px;
+      border-radius: var(--radius);
+      overflow: hidden;
+      border: 1px solid var(--border);
+      margin-bottom: 20px;
+      box-shadow: var(--shadow);
+    }
+
+    /* Actions */
+    .action-bar {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 28px;
+      align-items: center;
+    }
+    .back-link {
+      text-decoration: none;
+      color: var(--text-muted);
+      font-size: .8rem;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      margin-bottom: 14px;
+    }
+    .back-link:hover { color: var(--text); }
+  </style>
+</head>
+<body class="page">
+  <nav class="nav">
+    <a href="index.html" class="nav-brand">
+      <span class="nav-brand-icon">🎯</span>
+      <span class="nav-brand-name">Hunting Log</span>
+    </a>
+    <div class="nav-links">
+      <a href="index.html" class="nav-link always-show">🗺 Map</a>
+      <a href="log.html"   class="nav-link always-show">📋 Log</a>
+    </div>
+    <a href="add.html" class="nav-add">+ New Hunt</a>
+  </nav>
+
+  <div class="detail-wrap" id="detail-wrap">
+    <div class="empty-state">
+      <div class="empty-state-icon">🔍</div>
+      <h3>Hunt not found</h3>
+      <p><a href="log.html" style="color:var(--accent)">Back to Log</a></p>
+    </div>
+  </div>
+
+  <!-- Lightbox -->
+  <div class="lightbox hidden" id="lightbox">
+    <button class="lightbox-close" id="lb-close">✕</button>
+    <button class="lightbox-prev" id="lb-prev">‹</button>
+    <img id="lb-img" src="" alt="" />
+    <button class="lightbox-next" id="lb-next">›</button>
+  </div>
+
+  <!-- Delete confirm modal -->
+  <div class="modal-backdrop hidden" id="delete-modal">
+    <div class="modal">
+      <button class="modal-close" id="delete-cancel">✕</button>
+      <h3 style="font-family:'Oswald',sans-serif;font-size:1.2rem;margin-bottom:10px;text-transform:uppercase">Delete this hunt?</h3>
+      <p style="font-size:.85rem;color:var(--text-muted);margin-bottom:20px;line-height:1.6">This will permanently remove the entry and all its photos. This cannot be undone.</p>
+      <div style="display:flex;gap:10px">
+        <button class="btn btn-danger" id="delete-confirm">Yes, Delete</button>
+        <button class="btn btn-secondary" id="delete-cancel-2">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="storage.js"></script>
+  <script>
+    const params = new URLSearchParams(location.search);
+    const id = params.get('id');
+    const h = id ? getHunt(id) : null;
+
+    if (h) renderDetail(h);
+
+    function renderDetail(h) {
+      const wrap = document.getElementById('detail-wrap');
+
+      const heroEl = h.photos && h.photos.length
+        ? `<img class="hero-img" src="${h.photos[0]}" alt="${escHtml(h.animal)}" />`
+        : `<div class="hero-no-photo">${animalEmoji(h.animal)}</div>`;
+
+      const hasOverlay = h.photos && h.photos.length;
+
+      wrap.innerHTML = `
+        <a href="log.html" class="back-link">← Back to Log</a>
+
+        <div class="action-bar">
+          <span class="pill ${h.result}" style="font-size:.72rem;padding:5px 12px">${h.result}</span>
+          <a href="add.html?id=${h.id}" class="btn btn-secondary" style="font-size:.8rem;padding:8px 16px">✏️ Edit</a>
+          <button class="btn btn-danger" id="open-delete" style="font-size:.8rem;padding:8px 16px">🗑 Delete</button>
+        </div>
+
+        <div class="hero">
+          ${heroEl}
+          ${hasOverlay ? `
+            <div class="hero-overlay">
+              <div class="animal-name">${escHtml(h.animal)}</div>
+              <div class="hero-meta">📅 ${formatDate(h.date)} &nbsp;·&nbsp; 📍 ${escHtml(h.location)}</div>
+            </div>` : `
+            <div style="padding:16px 18px 12px">
+              <div style="font-family:'Oswald',sans-serif;font-size:1.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em">${escHtml(h.animal)}</div>
+              <div style="font-size:.8rem;color:var(--text-muted);margin-top:3px">📅 ${formatDate(h.date)} &nbsp;·&nbsp; 📍 ${escHtml(h.location)}</div>
+            </div>`
+          }
+        </div>
+
+        <div class="info-grid">
+          <div class="info-cell">
+            <div class="info-cell-label">Date</div>
+            <div class="info-cell-value">📅 ${formatDate(h.date)}</div>
+          </div>
+          <div class="info-cell">
+            <div class="info-cell-label">Firearm / Weapon</div>
+            <div class="info-cell-value">🔫 ${escHtml(h.gun)}</div>
+          </div>
+          <div class="info-cell">
+            <div class="info-cell-label">Location</div>
+            <div class="info-cell-value">📍 ${escHtml(h.location)}</div>
+          </div>
+          ${h.distance ? `
+          <div class="info-cell">
+            <div class="info-cell-label">Shot Distance</div>
+            <div class="info-cell-value">📏 ${escHtml(h.distance)}</div>
+          </div>` : ''}
+          <div class="info-cell">
+            <div class="info-cell-label">Result</div>
+            <div class="info-cell-value"><span class="pill ${h.result}">${h.result}</span></div>
+          </div>
+        </div>
+
+        ${h.notes ? `
+        <div class="notes-card">
+          <p class="section-label" style="margin-bottom:10px">📝 Field Notes</p>
+          <p>${escHtml(h.notes)}</p>
+        </div>` : ''}
+
+        <div id="mini-map"></div>
+
+        ${h.photos && h.photos.length > 1 ? `
+        <div class="notes-card" style="margin-bottom:20px">
+          <p class="section-label" style="margin-bottom:12px">📸 Photos (${h.photos.length})</p>
+          <div class="gallery-grid" id="gallery"></div>
+        </div>` : ''}
+      `;
+
+      // Build mini map
+      initMiniMap(h);
+
+      // Gallery
+      if (h.photos && h.photos.length > 1) {
+        const gallery = document.getElementById('gallery');
+        gallery.innerHTML = h.photos.map((src, i) => `
+          <div class="gallery-item" data-i="${i}">
+            <img src="${src}" alt="Photo ${i+1}" loading="lazy" />
+          </div>`).join('');
+        gallery.querySelectorAll('.gallery-item').forEach(item => {
+          item.addEventListener('click', () => openLightbox(h.photos, parseInt(item.dataset.i)));
+        });
+      }
+
+      // Delete
+      document.getElementById('open-delete').addEventListener('click', () => {
+        document.getElementById('delete-modal').classList.remove('hidden');
+      });
+    }
+
+    function initMiniMap(h) {
+      const miniMap = L.map('mini-map', { zoomControl: true, scrollWheelZoom: false });
+      L.tileLayer(
+        'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+        { attribution: 'Tiles &copy; Esri', maxZoom: 19 }
+      ).addTo(miniMap);
+      L.tileLayer(
+        'https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',
+        { maxZoom: 19, opacity: 0.8 }
+      ).addTo(miniMap);
+
+      const icon = L.divIcon({
+        className: '',
+        html: `<div class="map-pin ${h.result}"><span class="pin-inner">${animalEmoji(h.animal)}</span></div>`,
+        iconSize: [36, 36],
+        iconAnchor: [18, 36],
+      });
+      L.marker([h.lat, h.lng], { icon }).addTo(miniMap);
+      miniMap.setView([h.lat, h.lng], 11);
+    }
+
+    // Lightbox
+    let lbPhotos = [], lbIndex = 0;
+    function openLightbox(photos, i) {
+      lbPhotos = photos; lbIndex = i;
+      document.getElementById('lb-img').src = photos[i];
+      document.getElementById('lightbox').classList.remove('hidden');
+      document.getElementById('lb-prev').style.display = photos.length > 1 ? 'flex' : 'none';
+      document.getElementById('lb-next').style.display = photos.length > 1 ? 'flex' : 'none';
+    }
+    document.getElementById('lb-close').addEventListener('click', () =>
+      document.getElementById('lightbox').classList.add('hidden'));
+    document.getElementById('lb-prev').addEventListener('click', () => {
+      lbIndex = (lbIndex - 1 + lbPhotos.length) % lbPhotos.length;
+      document.getElementById('lb-img').src = lbPhotos[lbIndex];
+    });
+    document.getElementById('lb-next').addEventListener('click', () => {
+      lbIndex = (lbIndex + 1) % lbPhotos.length;
+      document.getElementById('lb-img').src = lbPhotos[lbIndex];
+    });
+    document.addEventListener('keydown', e => {
+      if (!document.getElementById('lightbox').classList.contains('hidden')) {
+        if (e.key === 'Escape') document.getElementById('lightbox').classList.add('hidden');
+        if (e.key === 'ArrowLeft') document.getElementById('lb-prev').click();
+        if (e.key === 'ArrowRight') document.getElementById('lb-next').click();
+      }
+    });
+    document.getElementById('lightbox').addEventListener('click', e => {
+      if (e.target === document.getElementById('lightbox'))
+        document.getElementById('lightbox').classList.add('hidden');
+    });
+
+    // Delete modal
+    function closeDeleteModal() {
+      document.getElementById('delete-modal').classList.add('hidden');
+    }
+    document.getElementById('delete-cancel').addEventListener('click', closeDeleteModal);
+    document.getElementById('delete-cancel-2').addEventListener('click', closeDeleteModal);
+    document.getElementById('delete-confirm').addEventListener('click', () => {
+      deleteHunt(id);
+      window.location.href = 'log.html';
+    });
+  </script>
+</body>
+</html>

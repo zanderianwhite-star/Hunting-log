@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hunting Log — Log</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .log-header {
+      padding: 28px 24px 0;
+      max-width: 1100px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .log-title {
+      font-family: 'Oswald', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+      flex: 1;
+      min-width: 160px;
+    }
+    .log-controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .search-wrap { position: relative; }
+    .search-wrap input {
+      padding-left: 32px;
+      width: 220px;
+      font-size: .83rem;
+    }
+    .search-icon {
+      position: absolute;
+      left: 10px; top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-dim);
+      pointer-events: none;
+      font-size: .85rem;
+    }
+    .filter-select {
+      width: auto;
+      font-size: .83rem;
+      padding: 10px 12px;
+      cursor: pointer;
+    }
+    .stats-bar {
+      max-width: 1100px;
+      margin: 16px auto 0;
+      padding: 0 24px;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .stat-chip {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 8px 14px;
+      font-size: .78rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: var(--shadow);
+    }
+    .stat-chip strong { color: var(--text); font-size: .9rem; }
+
+    .hunt-grid {
+      max-width: 1100px;
+      margin: 20px auto 40px;
+      padding: 0 24px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 16px;
+    }
+
+    .hunt-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      cursor: pointer;
+      text-decoration: none;
+      color: inherit;
+      display: flex;
+      flex-direction: column;
+      transition: box-shadow var(--transition), transform var(--transition);
+    }
+    .hunt-card:hover {
+      box-shadow: var(--shadow-lg);
+      transform: translateY(-2px);
+    }
+
+    .card-photo {
+      width: 100%;
+      height: 160px;
+      object-fit: cover;
+      display: block;
+      background: var(--surface-2);
+    }
+    .card-no-photo {
+      width: 100%;
+      height: 120px;
+      background: var(--surface-2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.5rem;
+    }
+    .card-body { padding: 14px 16px 16px; flex: 1; display: flex; flex-direction: column; gap: 8px; }
+    .card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+    .card-animal {
+      font-family: 'Oswald', sans-serif;
+      font-size: 1.05rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+      line-height: 1.2;
+    }
+    .card-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      font-size: .75rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+    .card-meta-row { display: flex; align-items: center; gap: 5px; }
+    .card-footer {
+      margin-top: auto;
+      padding-top: 10px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: .73rem;
+      color: var(--text-dim);
+    }
+    .card-photo-count {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+  </style>
+</head>
+<body class="page">
+  <nav class="nav">
+    <a href="index.html" class="nav-brand">
+      <span class="nav-brand-icon">🎯</span>
+      <span class="nav-brand-name">Hunting Log</span>
+    </a>
+    <div class="nav-links">
+      <a href="index.html" class="nav-link always-show">🗺 Map</a>
+      <a href="log.html"   class="nav-link active always-show">📋 Log</a>
+    </div>
+    <a href="add.html" class="nav-add">+ New Hunt</a>
+  </nav>
+
+  <div class="log-header">
+    <h1 class="log-title">Hunt Log</h1>
+    <div class="log-controls">
+      <div class="search-wrap">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="search" placeholder="Search hunts…" />
+      </div>
+      <select class="filter-select" id="filter-result">
+        <option value="">All Results</option>
+        <option value="Harvested">Harvested</option>
+        <option value="Missed">Missed</option>
+        <option value="Scouting">Scouting</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="stats-bar" id="stats-bar"></div>
+
+  <div class="hunt-grid" id="hunt-grid"></div>
+
+  <script src="storage.js"></script>
+  <script>
+    function renderStats(hunts) {
+      const bar = document.getElementById('stats-bar');
+      const total     = hunts.length;
+      const harvested = hunts.filter(h => h.result === 'Harvested').length;
+      const missed    = hunts.filter(h => h.result === 'Missed').length;
+      const scouting  = hunts.filter(h => h.result === 'Scouting').length;
+      const withPhotos= hunts.filter(h => h.photos && h.photos.length).length;
+      bar.innerHTML = `
+        <div class="stat-chip">🎯 <strong>${total}</strong> Total</div>
+        <div class="stat-chip">✅ <strong>${harvested}</strong> Harvested</div>
+        <div class="stat-chip">❌ <strong>${missed}</strong> Missed</div>
+        <div class="stat-chip">👁 <strong>${scouting}</strong> Scouting</div>
+        <div class="stat-chip">📸 <strong>${withPhotos}</strong> With Photos</div>
+      `;
+    }
+
+    function renderGrid() {
+      const q      = document.getElementById('search').value.toLowerCase();
+      const result = document.getElementById('filter-result').value;
+      let hunts = loadHunts();
+
+      renderStats(hunts);
+
+      hunts = hunts.filter(h => {
+        const matchQ = !q ||
+          h.animal.toLowerCase().includes(q) ||
+          h.location.toLowerCase().includes(q) ||
+          h.gun.toLowerCase().includes(q) ||
+          (h.notes || '').toLowerCase().includes(q);
+        const matchR = !result || h.result === result;
+        return matchQ && matchR;
+      });
+
+      const grid = document.getElementById('hunt-grid');
+
+      if (!hunts.length) {
+        grid.innerHTML = `
+          <div class="empty-state" style="grid-column:1/-1">
+            <div class="empty-state-icon">🦌</div>
+            <h3>No hunts found</h3>
+            <p>Try adjusting your search or filters, or <a href="add.html" style="color:var(--accent)">add a new hunt</a>.</p>
+          </div>`;
+        return;
+      }
+
+      grid.innerHTML = hunts.map(h => {
+        const photoEl = h.photos && h.photos.length
+          ? `<img class="card-photo" src="${h.photos[0]}" alt="${escHtml(h.animal)}" loading="lazy" />`
+          : `<div class="card-no-photo">${animalEmoji(h.animal)}</div>`;
+        const photoCount = h.photos && h.photos.length > 1
+          ? `<span class="card-photo-count">📸 ${h.photos.length}</span>` : '';
+        return `
+          <a href="hunt.html?id=${h.id}" class="hunt-card">
+            ${photoEl}
+            <div class="card-body">
+              <div class="card-top">
+                <span class="card-animal">${escHtml(h.animal)}</span>
+                <span class="pill ${h.result}">${h.result}</span>
+              </div>
+              <div class="card-meta">
+                <div class="card-meta-row">📅 ${formatDate(h.date)}</div>
+                <div class="card-meta-row">📍 ${escHtml(h.location)}</div>
+                <div class="card-meta-row">🔫 ${escHtml(h.gun)}</div>
+              </div>
+              <div class="card-footer">
+                <span>${photoCount}</span>
+                <span>View →</span>
+              </div>
+            </div>
+          </a>`;
+      }).join('');
+    }
+
+    document.getElementById('search').addEventListener('input', renderGrid);
+    document.getElementById('filter-result').addEventListener('change', renderGrid);
+    renderGrid();
+  </script>
+</body>
+</html>

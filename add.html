@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hunting Log — Add Hunt</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .add-wrap {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 32px 24px 60px;
+    }
+    .add-title {
+      font-family: 'Oswald', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+      margin-bottom: 4px;
+    }
+    .add-sub {
+      font-size: .8rem;
+      color: var(--text-muted);
+      margin-bottom: 28px;
+    }
+    .form-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 28px 28px 24px;
+      margin-bottom: 16px;
+    }
+    .form-actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 24px;
+      flex-wrap: wrap;
+    }
+    .spinner {
+      display: inline-block;
+      width: 14px; height: 14px;
+      border: 2px solid rgba(255,255,255,.4);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin .6s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .input-with-icon { position: relative; }
+    .input-with-icon .field-icon {
+      position: absolute;
+      left: 11px; top: 50%;
+      transform: translateY(-50%);
+      pointer-events: none;
+      font-size: .9rem;
+    }
+    .input-with-icon input { padding-left: 34px; }
+  </style>
+</head>
+<body class="page">
+  <nav class="nav">
+    <a href="index.html" class="nav-brand">
+      <span class="nav-brand-icon">🎯</span>
+      <span class="nav-brand-name">Hunting Log</span>
+    </a>
+    <div class="nav-links">
+      <a href="index.html" class="nav-link always-show">🗺 Map</a>
+      <a href="log.html"   class="nav-link always-show">📋 Log</a>
+    </div>
+    <a href="log.html" class="nav-add" style="background:var(--surface-2);color:var(--text);border:1px solid var(--border)">✕ Cancel</a>
+  </nav>
+
+  <div class="add-wrap">
+    <h1 class="add-title" id="page-title">New Hunt Entry</h1>
+    <p class="add-sub">Fill in the details below. Location will be pinned on the map.</p>
+
+    <!-- Hunt Details -->
+    <div class="form-card">
+      <p class="section-label">Hunt Details</p>
+
+      <div class="field-row">
+        <div class="field-group">
+          <label for="f-animal">Animal *</label>
+          <div class="input-with-icon">
+            <span class="field-icon">🦌</span>
+            <input type="text" id="f-animal" placeholder="e.g. White-tailed Deer" required />
+          </div>
+        </div>
+        <div class="field-group">
+          <label for="f-result">Result</label>
+          <select id="f-result">
+            <option value="Harvested">✅ Harvested</option>
+            <option value="Missed">❌ Missed</option>
+            <option value="Scouting">👁 Scouting</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field-group">
+        <label for="f-gun">Firearm / Weapon *</label>
+        <div class="input-with-icon">
+          <span class="field-icon">🔫</span>
+          <input type="text" id="f-gun" placeholder="e.g. Remington 700 .308 Win" required />
+        </div>
+      </div>
+
+      <div class="field-row">
+        <div class="field-group">
+          <label for="f-date">Date *</label>
+          <input type="date" id="f-date" required />
+        </div>
+        <div class="field-group">
+          <label for="f-distance">Shot Distance</label>
+          <input type="text" id="f-distance" placeholder="e.g. 180 yards" />
+        </div>
+      </div>
+    </div>
+
+    <!-- Location -->
+    <div class="form-card">
+      <p class="section-label">Location</p>
+      <div class="field-group">
+        <label for="f-location">Location *</label>
+        <div class="input-with-icon">
+          <span class="field-icon">📍</span>
+          <input type="text" id="f-location" placeholder="e.g. Big Timber, Montana" required />
+        </div>
+        <p class="field-hint">City, state, or landmark — we'll geocode it and drop a pin on the map.</p>
+      </div>
+    </div>
+
+    <!-- Photos -->
+    <div class="form-card">
+      <p class="section-label">Photos</p>
+      <div class="photo-upload-area" id="upload-area">
+        <input type="file" id="f-photos" accept="image/*" multiple />
+        <div class="upload-icon">📸</div>
+        <div class="upload-text">
+          <strong>Click to upload</strong> or drag &amp; drop photos here<br>
+          JPEG, PNG, HEIC — multiple allowed
+        </div>
+      </div>
+      <div class="photo-previews" id="photo-previews"></div>
+    </div>
+
+    <!-- Notes -->
+    <div class="form-card">
+      <p class="section-label">Notes</p>
+      <div class="field-group" style="margin-bottom:0">
+        <label for="f-notes">Field Notes</label>
+        <textarea id="f-notes" rows="4" placeholder="Weather, time of day, stand location, shot details…"></textarea>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button class="btn btn-primary btn-lg" id="submit-btn">
+        <span id="btn-text">Save Hunt</span>
+        <span id="btn-spinner" class="spinner hidden"></span>
+      </button>
+      <a href="log.html" class="btn btn-secondary btn-lg">Cancel</a>
+    </div>
+    <div id="form-error" class="form-error hidden"></div>
+  </div>
+
+  <script src="storage.js"></script>
+  <script>
+    const params     = new URLSearchParams(location.search);
+    const editId     = params.get('id');
+    let pendingPhotos = []; // base64 strings for new photos
+    let existingPhotos = []; // base64 from loaded hunt (edit mode)
+
+    // Pre-fill form in edit mode
+    if (editId) {
+      const h = getHunt(editId);
+      if (h) {
+        document.getElementById('page-title').textContent = 'Edit Hunt Entry';
+        document.getElementById('f-animal').value   = h.animal;
+        document.getElementById('f-gun').value       = h.gun;
+        document.getElementById('f-date').value      = h.date;
+        document.getElementById('f-result').value    = h.result;
+        document.getElementById('f-location').value  = h.location;
+        document.getElementById('f-distance').value  = h.distance || '';
+        document.getElementById('f-notes').value     = h.notes || '';
+        document.getElementById('btn-text').textContent = 'Update Hunt';
+        existingPhotos = h.photos || [];
+        renderPreviews();
+      }
+    }
+
+    // Default date to today
+    if (!editId) {
+      document.getElementById('f-date').value = new Date().toISOString().split('T')[0];
+    }
+
+    // Photo upload
+    const uploadArea = document.getElementById('upload-area');
+    const fileInput  = document.getElementById('f-photos');
+
+    uploadArea.addEventListener('click', () => fileInput.click());
+
+    uploadArea.addEventListener('dragover', e => { e.preventDefault(); uploadArea.classList.add('drag-over'); });
+    uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('drag-over'));
+    uploadArea.addEventListener('drop', e => {
+      e.preventDefault();
+      uploadArea.classList.remove('drag-over');
+      handleFiles(Array.from(e.dataTransfer.files));
+    });
+
+    fileInput.addEventListener('change', () => {
+      handleFiles(Array.from(fileInput.files));
+      fileInput.value = '';
+    });
+
+    async function handleFiles(files) {
+      const imageFiles = files.filter(f => f.type.startsWith('image/'));
+      for (const file of imageFiles) {
+        try {
+          const compressed = await compressImage(file);
+          pendingPhotos.push(compressed);
+          renderPreviews();
+        } catch (e) {
+          console.error('Image error:', e);
+        }
+      }
+    }
+
+    function renderPreviews() {
+      const container = document.getElementById('photo-previews');
+      const all = [...existingPhotos, ...pendingPhotos];
+      if (!all.length) { container.innerHTML = ''; return; }
+      container.innerHTML = all.map((src, i) => `
+        <div class="photo-thumb">
+          <img src="${src}" alt="Photo ${i+1}" />
+          <button class="photo-thumb-remove" data-i="${i}" title="Remove">✕</button>
+        </div>
+      `).join('');
+      container.querySelectorAll('.photo-thumb-remove').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const i = parseInt(btn.dataset.i);
+          if (i < existingPhotos.length) existingPhotos.splice(i, 1);
+          else pendingPhotos.splice(i - existingPhotos.length, 1);
+          renderPreviews();
+        });
+      });
+    }
+
+    // Submit
+    document.getElementById('submit-btn').addEventListener('click', async () => {
+      const animal    = document.getElementById('f-animal').value.trim();
+      const gun       = document.getElementById('f-gun').value.trim();
+      const date      = document.getElementById('f-date').value;
+      const result    = document.getElementById('f-result').value;
+      const locStr    = document.getElementById('f-location').value.trim();
+      const distance  = document.getElementById('f-distance').value.trim();
+      const notes     = document.getElementById('f-notes').value.trim();
+      const errorEl   = document.getElementById('form-error');
+
+      errorEl.classList.add('hidden');
+      if (!animal || !gun || !date || !locStr) {
+        errorEl.textContent = 'Please fill in Animal, Firearm, Date, and Location.';
+        errorEl.classList.remove('hidden');
+        return;
+      }
+
+      setLoading(true);
+
+      try {
+        let lat, lng, displayName;
+
+        if (editId) {
+          const existing = getHunt(editId);
+          // Re-geocode only if location changed
+          if (existing && existing.location === locStr) {
+            lat = existing.lat; lng = existing.lng; displayName = existing.displayName;
+          } else {
+            const geo = await geocode(locStr);
+            lat = geo.lat; lng = geo.lng; displayName = geo.display;
+          }
+        } else {
+          const geo = await geocode(locStr);
+          lat = geo.lat; lng = geo.lng; displayName = geo.display;
+        }
+
+        const photos = [...existingPhotos, ...pendingPhotos];
+
+        const hunt = {
+          id:          editId || crypto.randomUUID(),
+          animal, gun, date, result, location: locStr, distance, notes,
+          lat, lng, displayName, photos,
+          createdAt:   editId ? getHunt(editId).createdAt : Date.now(),
+          updatedAt:   Date.now(),
+        };
+
+        if (editId) updateHunt(hunt);
+        else addHunt(hunt);
+
+        window.location.href = `hunt.html?id=${hunt.id}`;
+      } catch (err) {
+        errorEl.textContent = err.message || 'Something went wrong. Try again.';
+        errorEl.classList.remove('hidden');
+        setLoading(false);
+      }
+    });
+
+    function setLoading(on) {
+      const btn = document.getElementById('submit-btn');
+      btn.disabled = on;
+      document.getElementById('btn-text').classList.toggle('hidden', on);
+      document.getElementById('btn-spinner').classList.toggle('hidden', !on);
+    }
+  </script>
+</body>
+</html>
