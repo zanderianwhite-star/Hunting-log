@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hunting Log</title>
+
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ── SIDEBAR ── -->
+  <aside class="sidebar" id="sidebar">
+    <header class="sidebar-header">
+      <div class="logo">
+        <span class="logo-icon">🎯</span>
+        <div>
+          <h1>Hunting Log</h1>
+          <p class="logo-sub">Track your field journal</p>
+        </div>
+      </div>
+    </header>
+
+    <!-- Add Hunt Form -->
+    <section class="form-section">
+      <h2 class="section-title">New Entry</h2>
+      <form id="hunt-form" novalidate>
+        <div class="field-group">
+          <label for="f-animal">Animal</label>
+          <div class="input-icon-wrap">
+            <span class="input-icon">🦌</span>
+            <input type="text" id="f-animal" placeholder="e.g. White-tailed Deer" required />
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label for="f-gun">Firearm / Weapon</label>
+          <div class="input-icon-wrap">
+            <span class="input-icon">🔫</span>
+            <input type="text" id="f-gun" placeholder="e.g. Remington 700 .308" required />
+          </div>
+        </div>
+
+        <div class="field-row">
+          <div class="field-group">
+            <label for="f-date">Date</label>
+            <div class="input-icon-wrap">
+              <span class="input-icon">📅</span>
+              <input type="date" id="f-date" required />
+            </div>
+          </div>
+          <div class="field-group">
+            <label for="f-result">Result</label>
+            <select id="f-result">
+              <option value="Harvested">Harvested</option>
+              <option value="Missed">Missed</option>
+              <option value="Scouting">Scouting</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label for="f-location">Location</label>
+          <div class="input-icon-wrap">
+            <span class="input-icon">📍</span>
+            <input type="text" id="f-location" placeholder="e.g. Big Timber, Montana" required />
+          </div>
+          <p class="field-hint">City, state or coordinates — we'll pin it on the map.</p>
+        </div>
+
+        <div class="field-group">
+          <label for="f-notes">Notes</label>
+          <textarea id="f-notes" rows="3" placeholder="Shot distance, weather, time of day…"></textarea>
+        </div>
+
+        <button type="submit" class="btn-primary" id="submit-btn">
+          <span class="btn-text">Add to Log</span>
+          <span class="btn-spinner hidden">Locating…</span>
+        </button>
+        <div id="form-error" class="form-error hidden"></div>
+      </form>
+    </section>
+
+    <!-- Hunt List -->
+    <section class="log-section">
+      <div class="log-header">
+        <h2 class="section-title">Log <span id="log-count" class="count-badge">0</span></h2>
+        <input type="text" id="search" placeholder="Search…" class="search-input" />
+      </div>
+      <ul id="hunt-list" class="hunt-list">
+        <li class="empty-state">
+          No hunts logged yet. Add your first entry above.
+        </li>
+      </ul>
+    </section>
+  </aside>
+
+  <!-- ── TOGGLE SIDEBAR BUTTON (mobile) ── -->
+  <button class="sidebar-toggle" id="sidebar-toggle" title="Toggle sidebar">☰</button>
+
+  <!-- ── MAP ── -->
+  <main class="map-wrap">
+    <div id="map"></div>
+    <div id="map-overlay" class="map-overlay">
+      <span>Click a pin to view hunt details</span>
+    </div>
+  </main>
+
+  <!-- ── DETAIL MODAL ── -->
+  <div id="modal-backdrop" class="modal-backdrop hidden">
+    <div class="modal" role="dialog" aria-modal="true">
+      <button class="modal-close" id="modal-close">✕</button>
+      <div class="modal-badge" id="modal-result-badge"></div>
+      <h3 id="modal-animal"></h3>
+      <p class="modal-meta" id="modal-meta"></p>
+      <div class="modal-grid" id="modal-grid"></div>
+      <p class="modal-notes" id="modal-notes"></p>
+      <button class="btn-danger" id="modal-delete">Delete Entry</button>
+    </div>
+  </div>
+
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
