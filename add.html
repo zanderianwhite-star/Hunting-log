@@ -103,12 +103,11 @@
 <body class="page">
   <nav class="nav">
     <a href="index.html" class="nav-brand">
-      <span class="nav-brand-icon">🎯</span>
       <span class="nav-brand-name">Hunting Log</span>
     </a>
     <div class="nav-links">
-      <a href="index.html" class="nav-link always-show">🗺 Map</a>
-      <a href="log.html"   class="nav-link always-show">📋 Log</a>
+      <a href="index.html" class="nav-link always-show">Map</a>
+      <a href="log.html"   class="nav-link always-show">Log</a>
     </div>
     <a href="log.html" class="nav-add" style="background:var(--surface-2);color:var(--text);border:1px solid var(--border)">✕ Cancel</a>
   </nav>
@@ -124,27 +123,21 @@
       <div class="field-row">
         <div class="field-group">
           <label for="f-animal">Animal *</label>
-          <div class="input-with-icon">
-            <span class="field-icon">🦌</span>
-            <input type="text" id="f-animal" placeholder="e.g. White-tailed Deer" required />
-          </div>
+          <input type="text" id="f-animal" placeholder="e.g. White-tailed Deer" required />
         </div>
         <div class="field-group">
           <label for="f-result">Result</label>
           <select id="f-result">
-            <option value="Harvested">✅ Harvested</option>
-            <option value="Missed">❌ Missed</option>
-            <option value="Scouting">👁 Scouting</option>
+            <option value="Harvested">Harvested</option>
+            <option value="Missed">Missed</option>
+            <option value="Scouting">Scouting</option>
           </select>
         </div>
       </div>
 
       <div class="field-group">
         <label for="f-gun">Firearm / Weapon *</label>
-        <div class="input-with-icon">
-          <span class="field-icon">🔫</span>
-          <input type="text" id="f-gun" placeholder="e.g. Remington 700 .308 Win" required />
-        </div>
+        <input type="text" id="f-gun" placeholder="e.g. Remington 700 .308 Win" required />
       </div>
 
       <div class="field-row">
@@ -166,7 +159,7 @@
         <label for="f-location">Location *</label>
         <div class="loc-row">
           <input type="text" id="f-location" placeholder="e.g. Big Timber, Montana" />
-          <button type="button" class="find-btn" id="find-btn">🔍 Find</button>
+          <button type="button" class="find-btn" id="find-btn">Find</button>
         </div>
         <p class="field-hint" style="margin-top:5px">Type a place and click Find — <strong>or click directly on the map</strong> to drop a pin.</p>
         <div id="pin-map"></div>
@@ -179,7 +172,6 @@
       <p class="section-label">Photos</p>
       <div class="photo-upload-area" id="upload-area">
         <input type="file" id="f-photos" accept="image/*" multiple />
-        <div class="upload-icon">📸</div>
         <div class="upload-text">
           <strong>Click to upload</strong> or drag &amp; drop photos here<br>
           JPEG, PNG, HEIC — multiple allowed
@@ -243,7 +235,7 @@
       pinMarker = L.marker([lat, lng], { icon: pinIcon }).addTo(map);
       if (!skipMapMove) map.flyTo([lat, lng], 12, { duration: 1 });
       const status = document.getElementById('pin-status');
-      status.textContent = `📍 ${label}`;
+      status.textContent = label;
       status.className = 'pin-status set';
     }
 
@@ -291,7 +283,7 @@
         document.getElementById('form-error').classList.remove('hidden');
       } finally {
         btn.disabled = false;
-        btn.innerHTML = '🔍 Find';
+        btn.innerHTML = 'Find';
       }
     });
 

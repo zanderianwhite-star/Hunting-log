@@ -156,12 +156,11 @@
 <body class="page">
   <nav class="nav">
     <a href="index.html" class="nav-brand">
-      <span class="nav-brand-icon">🎯</span>
       <span class="nav-brand-name">Hunting Log</span>
     </a>
     <div class="nav-links">
-      <a href="index.html" class="nav-link always-show">🗺 Map</a>
-      <a href="log.html"   class="nav-link active always-show">📋 Log</a>
+      <a href="index.html" class="nav-link always-show">Map</a>
+      <a href="log.html"   class="nav-link active always-show">Log</a>
     </div>
     <a href="add.html" class="nav-add">+ New Hunt</a>
   </nav>
@@ -170,7 +169,7 @@
     <h1 class="log-title">Hunt Log</h1>
     <div class="log-controls">
       <div class="search-wrap">
-        <span class="search-icon">🔍</span>
+        <span class="search-icon"></span>
         <input type="text" id="search" placeholder="Search hunts…" />
       </div>
       <select class="filter-select" id="filter-result">
@@ -196,11 +195,11 @@
       const scouting  = hunts.filter(h => h.result === 'Scouting').length;
       const withPhotos= hunts.filter(h => h.photos && h.photos.length).length;
       bar.innerHTML = `
-        <div class="stat-chip">🎯 <strong>${total}</strong> Total</div>
-        <div class="stat-chip">✅ <strong>${harvested}</strong> Harvested</div>
-        <div class="stat-chip">❌ <strong>${missed}</strong> Missed</div>
-        <div class="stat-chip">👁 <strong>${scouting}</strong> Scouting</div>
-        <div class="stat-chip">📸 <strong>${withPhotos}</strong> With Photos</div>
+        <div class="stat-chip"><strong>${total}</strong> Total</div>
+        <div class="stat-chip"><strong>${harvested}</strong> Harvested</div>
+        <div class="stat-chip"><strong>${missed}</strong> Missed</div>
+        <div class="stat-chip"><strong>${scouting}</strong> Scouting</div>
+        <div class="stat-chip"><strong>${withPhotos}</strong> With Photos</div>
       `;
     }
 
@@ -226,7 +225,7 @@
       if (!hunts.length) {
         grid.innerHTML = `
           <div class="empty-state" style="grid-column:1/-1">
-            <div class="empty-state-icon">🦌</div>
+            <div class="empty-state-icon"></div>
             <h3>No hunts found</h3>
             <p>Try adjusting your search or filters, or <a href="add.html" style="color:var(--accent)">add a new hunt</a>.</p>
           </div>`;
@@ -236,9 +235,9 @@
       grid.innerHTML = hunts.map(h => {
         const photoEl = h.photos && h.photos.length
           ? `<img class="card-photo" src="${h.photos[0]}" alt="${escHtml(h.animal)}" loading="lazy" />`
-          : `<div class="card-no-photo">${animalEmoji(h.animal)}</div>`;
+          : `<div class="card-no-photo"></div>`;
         const photoCount = h.photos && h.photos.length > 1
-          ? `<span class="card-photo-count">📸 ${h.photos.length}</span>` : '';
+          ? `<span class="card-photo-count">${h.photos.length} Photos</span>` : '';
         return `
           <a href="hunt.html?id=${h.id}" class="hunt-card">
             ${photoEl}
@@ -248,9 +247,9 @@
                 <span class="pill ${h.result}">${h.result}</span>
               </div>
               <div class="card-meta">
-                <div class="card-meta-row">📅 ${formatDate(h.date)}</div>
-                <div class="card-meta-row">📍 ${escHtml(h.location)}</div>
-                <div class="card-meta-row">🔫 ${escHtml(h.gun)}</div>
+                <div class="card-meta-row">${formatDate(h.date)}</div>
+                <div class="card-meta-row">${escHtml(h.location)}</div>
+                <div class="card-meta-row">${escHtml(h.gun)}</div>
               </div>
               <div class="card-footer">
                 <span>${photoCount}</span>

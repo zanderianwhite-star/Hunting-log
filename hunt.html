@@ -156,19 +156,18 @@
 <body class="page">
   <nav class="nav">
     <a href="index.html" class="nav-brand">
-      <span class="nav-brand-icon">🎯</span>
       <span class="nav-brand-name">Hunting Log</span>
     </a>
     <div class="nav-links">
-      <a href="index.html" class="nav-link always-show">🗺 Map</a>
-      <a href="log.html"   class="nav-link always-show">📋 Log</a>
+      <a href="index.html" class="nav-link always-show">Map</a>
+      <a href="log.html"   class="nav-link always-show">Log</a>
     </div>
     <a href="add.html" class="nav-add">+ New Hunt</a>
   </nav>
 
   <div class="detail-wrap" id="detail-wrap">
     <div class="empty-state">
-      <div class="empty-state-icon">🔍</div>
+      <div class="empty-state-icon"></div>
       <h3>Hunt not found</h3>
       <p><a href="log.html" style="color:var(--accent)">Back to Log</a></p>
     </div>
@@ -209,7 +208,7 @@
 
       const heroEl = h.photos && h.photos.length
         ? `<img class="hero-img" src="${h.photos[0]}" alt="${escHtml(h.animal)}" />`
-        : `<div class="hero-no-photo">${animalEmoji(h.animal)}</div>`;
+        : `<div class="hero-no-photo"></div>`;
 
       const hasOverlay = h.photos && h.photos.length;
 
@@ -218,8 +217,8 @@
 
         <div class="action-bar">
           <span class="pill ${h.result}" style="font-size:.72rem;padding:5px 12px">${h.result}</span>
-          <a href="add.html?id=${h.id}" class="btn btn-secondary" style="font-size:.8rem;padding:8px 16px">✏️ Edit</a>
-          <button class="btn btn-danger" id="open-delete" style="font-size:.8rem;padding:8px 16px">🗑 Delete</button>
+          <a href="add.html?id=${h.id}" class="btn btn-secondary" style="font-size:.8rem;padding:8px 16px">Edit</a>
+          <button class="btn btn-danger" id="open-delete" style="font-size:.8rem;padding:8px 16px">Delete</button>
         </div>
 
         <div class="hero">
@@ -227,11 +226,11 @@
           ${hasOverlay ? `
             <div class="hero-overlay">
               <div class="animal-name">${escHtml(h.animal)}</div>
-              <div class="hero-meta">📅 ${formatDate(h.date)} &nbsp;·&nbsp; 📍 ${escHtml(h.location)}</div>
+              <div class="hero-meta">${formatDate(h.date)} &nbsp;·&nbsp; ${escHtml(h.location)}</div>
             </div>` : `
             <div style="padding:16px 18px 12px">
               <div style="font-family:'Oswald',sans-serif;font-size:1.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em">${escHtml(h.animal)}</div>
-              <div style="font-size:.8rem;color:var(--text-muted);margin-top:3px">📅 ${formatDate(h.date)} &nbsp;·&nbsp; 📍 ${escHtml(h.location)}</div>
+              <div style="font-size:.8rem;color:var(--text-muted);margin-top:3px">${formatDate(h.date)} &nbsp;·&nbsp; ${escHtml(h.location)}</div>
             </div>`
           }
         </div>
@@ -239,20 +238,20 @@
         <div class="info-grid">
           <div class="info-cell">
             <div class="info-cell-label">Date</div>
-            <div class="info-cell-value">📅 ${formatDate(h.date)}</div>
+            <div class="info-cell-value">${formatDate(h.date)}</div>
           </div>
           <div class="info-cell">
             <div class="info-cell-label">Firearm / Weapon</div>
-            <div class="info-cell-value">🔫 ${escHtml(h.gun)}</div>
+            <div class="info-cell-value">${escHtml(h.gun)}</div>
           </div>
           <div class="info-cell">
             <div class="info-cell-label">Location</div>
-            <div class="info-cell-value">📍 ${escHtml(h.location)}</div>
+            <div class="info-cell-value">${escHtml(h.location)}</div>
           </div>
           ${h.distance ? `
           <div class="info-cell">
             <div class="info-cell-label">Shot Distance</div>
-            <div class="info-cell-value">📏 ${escHtml(h.distance)}</div>
+            <div class="info-cell-value">${escHtml(h.distance)}</div>
           </div>` : ''}
           <div class="info-cell">
             <div class="info-cell-label">Result</div>
@@ -262,7 +261,7 @@
 
         ${h.notes ? `
         <div class="notes-card">
-          <p class="section-label" style="margin-bottom:10px">📝 Field Notes</p>
+          <p class="section-label" style="margin-bottom:10px">Field Notes</p>
           <p>${escHtml(h.notes)}</p>
         </div>` : ''}
 
@@ -270,7 +269,7 @@
 
         ${h.photos && h.photos.length > 1 ? `
         <div class="notes-card" style="margin-bottom:20px">
-          <p class="section-label" style="margin-bottom:12px">📸 Photos (${h.photos.length})</p>
+          <p class="section-label" style="margin-bottom:12px">Photos (${h.photos.length})</p>
           <div class="gallery-grid" id="gallery"></div>
         </div>` : ''}
       `;

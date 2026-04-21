@@ -58,12 +58,11 @@
   <div class="map-page">
     <nav class="nav">
       <a href="index.html" class="nav-brand">
-        <span class="nav-brand-icon">🎯</span>
         <span class="nav-brand-name">Hunting Log</span>
       </a>
       <div class="nav-links">
-        <a href="index.html" class="nav-link active always-show">🗺 Map</a>
-        <a href="log.html"   class="nav-link always-show">📋 Log</a>
+        <a href="index.html" class="nav-link active always-show">Map</a>
+        <a href="log.html"   class="nav-link always-show">Log</a>
       </div>
       <a href="add.html" class="nav-add">+ New Hunt</a>
     </nav>
@@ -131,9 +130,9 @@
           ${thumb}
           <div class="popup-animal">${escHtml(h.animal)}</div>
           <div class="popup-meta">
-            📅 ${formatDate(h.date)}<br>
-            🔫 ${escHtml(h.gun)}<br>
-            📍 ${escHtml(h.location)}
+            ${formatDate(h.date)}<br>
+            ${escHtml(h.gun)}<br>
+            ${escHtml(h.location)}
           </div>
           <span class="pill ${h.result}" style="margin-bottom:10px;display:inline-flex">${h.result}</span><br>
           <a href="hunt.html?id=${h.id}" class="popup-view-btn">View Details →</a>
