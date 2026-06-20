@@ -828,27 +828,51 @@
       <div class="roster-section">
         <div class="roster-title">Your Roster</div>
 
-        <div class="roster-slot" id="slot-QB" onclick="selectSlot('QB')">
+        <div class="roster-slot" id="slot-QB1" onclick="selectSlot('QB1')">
           <div class="slot-position">QB</div>
           <div class="slot-player-info"><div class="slot-empty">Quarterback</div></div>
         </div>
-        <div class="roster-slot" id="slot-RB" onclick="selectSlot('RB')">
+        <div class="roster-slot" id="slot-QB2" onclick="selectSlot('QB2')">
+          <div class="slot-position">QB</div>
+          <div class="slot-player-info"><div class="slot-empty">Quarterback</div></div>
+        </div>
+        <div class="roster-slot" id="slot-RB1" onclick="selectSlot('RB1')">
           <div class="slot-position">RB</div>
           <div class="slot-player-info"><div class="slot-empty">Running Back</div></div>
         </div>
-        <div class="roster-slot" id="slot-WR" onclick="selectSlot('WR')">
+        <div class="roster-slot" id="slot-RB2" onclick="selectSlot('RB2')">
+          <div class="slot-position">RB</div>
+          <div class="slot-player-info"><div class="slot-empty">Running Back</div></div>
+        </div>
+        <div class="roster-slot" id="slot-WR1" onclick="selectSlot('WR1')">
           <div class="slot-position">WR</div>
           <div class="slot-player-info"><div class="slot-empty">Wide Receiver / TE</div></div>
         </div>
-        <div class="roster-slot" id="slot-DL" onclick="selectSlot('DL')">
+        <div class="roster-slot" id="slot-WR2" onclick="selectSlot('WR2')">
+          <div class="slot-position">WR</div>
+          <div class="slot-player-info"><div class="slot-empty">Wide Receiver / TE</div></div>
+        </div>
+        <div class="roster-slot" id="slot-DL1" onclick="selectSlot('DL1')">
           <div class="slot-position">DL</div>
           <div class="slot-player-info"><div class="slot-empty">Defensive Line</div></div>
         </div>
-        <div class="roster-slot" id="slot-LB" onclick="selectSlot('LB')">
+        <div class="roster-slot" id="slot-DL2" onclick="selectSlot('DL2')">
+          <div class="slot-position">DL</div>
+          <div class="slot-player-info"><div class="slot-empty">Defensive Line</div></div>
+        </div>
+        <div class="roster-slot" id="slot-LB1" onclick="selectSlot('LB1')">
           <div class="slot-position">LB</div>
           <div class="slot-player-info"><div class="slot-empty">Linebacker</div></div>
         </div>
-        <div class="roster-slot" id="slot-S" onclick="selectSlot('S')">
+        <div class="roster-slot" id="slot-LB2" onclick="selectSlot('LB2')">
+          <div class="slot-position">LB</div>
+          <div class="slot-player-info"><div class="slot-empty">Linebacker</div></div>
+        </div>
+        <div class="roster-slot" id="slot-S1" onclick="selectSlot('S1')">
+          <div class="slot-position">S</div>
+          <div class="slot-player-info"><div class="slot-empty">Safety / CB</div></div>
+        </div>
+        <div class="roster-slot" id="slot-S2" onclick="selectSlot('S2')">
           <div class="slot-position">S</div>
           <div class="slot-player-info"><div class="slot-empty">Safety / CB</div></div>
         </div>
@@ -944,8 +968,11 @@ const TEAMS = [
 
 const DECADES = ["1970s","1980s","1990s","2000s","2010s","2020s"];
 
-const TOTAL_ROUNDS = 8;
-const POSITIONS = ['QB','RB','WR','DL','LB','S','K','HC'];
+// Two slots for every position except Kicker and Head Coach
+const SLOTS = ['QB1','QB2','RB1','RB2','WR1','WR2','DL1','DL2','LB1','LB2','S1','S2','K','HC'];
+const SLOT_BASE = slot => slot.replace(/\d+$/, '');
+const TOTAL_ROUNDS = SLOTS.length;
+const POSITIONS = SLOTS; // alias kept for compatibility
 
 const PLAYERS = {
 "Alabama": {
@@ -956,6 +983,11 @@ const PLAYERS = {
     {name:"Bear Bryant",pos:["HC"],pass:0,rush:0,recv:0,passD:0,rushD:0,kick:0,coach:97,years:"1958-82"},
     {name:"Richard Todd",pos:["QB"],pass:72,rush:15,recv:0,passD:0,rushD:0,kick:0,coach:0,years:"1973-75"},
     {name:"Woodrow Lowe",pos:["LB"],pass:0,rush:0,recv:0,passD:68,rushD:82,kick:0,coach:0,years:"1972-75"},
+    {name:"Marty Lyons",pos:["DL"],pass:0,rush:0,recv:0,passD:55,rushD:84,kick:0,coach:0,years:"1975-78"},
+    {name:"Tony Nathan",pos:["RB"],pass:0,rush:82,recv:18,passD:0,rushD:0,kick:0,coach:0,years:"1975-78"},
+    {name:"Bob Baumhower",pos:["DL"],pass:0,rush:0,recv:0,passD:50,rushD:82,kick:0,coach:0,years:"1973-76"},
+    {name:"Don McNeal",pos:["S"],pass:0,rush:0,recv:0,passD:80,rushD:42,kick:0,coach:0,years:"1977-79"},
+    {name:"Jeff Rutledge",pos:["QB"],pass:74,rush:10,recv:0,passD:0,rushD:0,kick:0,coach:0,years:"1976-78"},
   ],
   "1980s": [
     {name:"Cornelius Bennett",pos:["LB","DL"],pass:0,rush:0,recv:0,passD:65,rushD:92,kick:0,coach:0,years:"1983-86"},
@@ -964,6 +996,11 @@ const PLAYERS = {
     {name:"Van Tiffin",pos:["K"],pass:0,rush:0,recv:0,passD:0,rushD:0,kick:82,coach:0,years:"1983-86"},
     {name:"Thomas Rayam",pos:["DL"],pass:0,rush:0,recv:0,passD:52,rushD:80,kick:0,coach:0,years:"1986-89"},
     {name:"Al Bell",pos:["WR"],pass:0,rush:5,recv:75,passD:0,rushD:0,kick:0,coach:0,years:"1984-87"},
+    {name:"Ray Perkins",pos:["HC"],pass:0,rush:0,recv:0,passD:0,rushD:0,kick:0,coach:70,years:"1983-86"},
+    {name:"Gene Jelks",pos:["RB"],pass:0,rush:80,recv:15,passD:0,rushD:0,kick:0,coach:0,years:"1985-88"},
+    {name:"Walter Lewis",pos:["QB"],pass:75,rush:22,recv:0,passD:0,rushD:0,kick:0,coach:0,years:"1980-83"},
+    {name:"Jeremiah Castille",pos:["S"],pass:0,rush:0,recv:0,passD:80,rushD:44,kick:0,coach:0,years:"1979-82"},
+    {name:"Wayne Davis",pos:["S"],pass:0,rush:0,recv:0,passD:76,rushD:40,kick:0,coach:0,years:"1983-86"},
   ],
   "1990s": [
     {name:"Jay Barker",pos:["QB"],pass:70,rush:15,recv:0,passD:0,rushD:0,kick:0,coach:0,years:"1991-94"},
@@ -974,6 +1011,10 @@ const PLAYERS = {
     {name:"Michael Proctor",pos:["K"],pass:0,rush:0,recv:0,passD:0,rushD:0,kick:78,coach:0,years:"1992-95"},
     {name:"Kevin Jackson",pos:["WR"],pass:0,rush:3,recv:72,passD:0,rushD:0,kick:0,coach:0,years:"1993-96"},
     {name:"Deshea Townsend",pos:["S"],pass:0,rush:0,recv:0,passD:78,rushD:38,kick:0,coach:0,years:"1994-97"},
+    {name:"Eric Curry",pos:["DL"],pass:0,rush:0,recv:0,passD:55,rushD:85,kick:0,coach:0,years:"1990-92"},
+    {name:"Sherman Williams",pos:["RB"],pass:0,rush:82,recv:18,passD:0,rushD:0,kick:0,coach:0,years:"1991-94"},
+    {name:"Chris Samuels",pos:["DL"],pass:0,rush:0,recv:0,passD:42,rushD:78,kick:0,coach:0,years:"1996-99"},
+    {name:"Dwayne Rudd",pos:["LB"],pass:0,rush:0,recv:0,passD:68,rushD:82,kick:0,coach:0,years:"1994-96"},
   ],
   "2000s": [
     {name:"Mark Ingram",pos:["RB"],pass:0,rush:87,recv:18,passD:0,rushD:0,kick:0,coach:0,years:"2008-10"},
@@ -984,6 +1025,10 @@ const PLAYERS = {
     {name:"Mark Barron",pos:["S"],pass:0,rush:0,recv:0,passD:82,rushD:55,kick:0,coach:0,years:"2008-11"},
     {name:"Greg McElroy",pos:["QB"],pass:78,rush:8,recv:0,passD:0,rushD:0,kick:0,coach:0,years:"2007-10"},
     {name:"Terrence Cody",pos:["DL"],pass:0,rush:0,recv:0,passD:48,rushD:82,kick:0,coach:0,years:"2007-09"},
+    {name:"Glen Coffee",pos:["RB"],pass:0,rush:80,recv:12,passD:0,rushD:0,kick:0,coach:0,years:"2006-08"},
+    {name:"Javier Arenas",pos:["S"],pass:0,rush:0,recv:0,passD:80,rushD:48,kick:0,coach:0,years:"2006-09"},
+    {name:"Andre Smith",pos:["DL"],pass:0,rush:0,recv:0,passD:40,rushD:78,kick:0,coach:0,years:"2006-08"},
+    {name:"Kareem Jackson",pos:["S"],pass:0,rush:0,recv:0,passD:78,rushD:46,kick:0,coach:0,years:"2007-09"},
   ],
   "2010s": [
     {name:"Tua Tagovailoa",pos:["QB"],pass:95,rush:12,recv:0,passD:0,rushD:0,kick:0,coach:0,years:"2017-19"},
@@ -996,6 +1041,11 @@ const PLAYERS = {
     {name:"Jalen Hurts",pos:["QB"],pass:82,rush:32,recv:0,passD:0,rushD:0,kick:0,coach:0,years:"2016-18"},
     {name:"Calvin Ridley",pos:["WR"],pass:0,rush:3,recv:85,passD:0,rushD:0,kick:0,coach:0,years:"2015-17"},
     {name:"Reuben Foster",pos:["LB"],pass:0,rush:0,recv:0,passD:68,rushD:85,kick:0,coach:0,years:"2013-16"},
+    {name:"A'Shawn Robinson",pos:["DL"],pass:0,rush:0,recv:0,passD:55,rushD:88,kick:0,coach:0,years:"2013-15"},
+    {name:"Eddie Jackson",pos:["S"],pass:0,rush:0,recv:0,passD:85,rushD:50,kick:0,coach:0,years:"2013-16"},
+    {name:"Da'Ron Payne",pos:["DL"],pass:0,rush:0,recv:0,passD:52,rushD:86,kick:0,coach:0,years:"2015-17"},
+    {name:"Landon Collins",pos:["S"],pass:0,rush:0,recv:0,passD:84,rushD:58,kick:0,coach:0,years:"2012-14"},
+    {name:"T.J. Yeldon",pos:["RB"],pass:0,rush:85,recv:18,passD:0,rushD:0,kick:0,coach:0,years:"2012-14"},
   ],
   "2020s": [
     {name:"Bryce Young",pos:["QB"],pass:93,rush:18,recv:0,passD:0,rushD:0,kick:0,coach:0,years:"2020-22"},
@@ -1007,6 +1057,12 @@ const PLAYERS = {
     {name:"Malachi Moore",pos:["S"],pass:0,rush:0,recv:0,passD:78,rushD:48,kick:0,coach:0,years:"2020-23"},
     {name:"Dallas Turner",pos:["LB"],pass:0,rush:0,recv:0,passD:62,rushD:88,kick:0,coach:0,years:"2021-23"},
     {name:"Najee Harris",pos:["RB"],pass:0,rush:90,recv:18,passD:0,rushD:0,kick:0,coach:0,years:"2017-20"},
+    {name:"Jalen Milroe",pos:["QB"],pass:84,rush:42,recv:0,passD:0,rushD:0,kick:0,coach:0,years:"2021-24"},
+    {name:"Kalen DeBoer",pos:["HC"],pass:0,rush:0,recv:0,passD:0,rushD:0,kick:0,coach:80,years:"2024-"},
+    {name:"Brian Robinson Jr.",pos:["RB"],pass:0,rush:85,recv:15,passD:0,rushD:0,kick:0,coach:0,years:"2017-21"},
+    {name:"Jameson Williams",pos:["WR"],pass:0,rush:5,recv:88,passD:0,rushD:0,kick:0,coach:0,years:"2021"},
+    {name:"Brian Branch",pos:["S"],pass:0,rush:0,recv:0,passD:85,rushD:55,kick:0,coach:0,years:"2020-22"},
+    {name:"Terrion Arnold",pos:["S"],pass:0,rush:0,recv:0,passD:84,rushD:50,kick:0,coach:0,years:"2021-23"},
   ],
 },
 "Ohio State": {
@@ -1018,6 +1074,10 @@ const PLAYERS = {
     {name:"Neal Colzie",pos:["S"],pass:0,rush:0,recv:0,passD:80,rushD:42,kick:0,coach:0,years:"1972-74"},
     {name:"Tom Skladany",pos:["K"],pass:0,rush:0,recv:0,passD:0,rushD:0,kick:82,coach:0,years:"1973-76"},
     {name:"Cornelius Greene",pos:["QB"],pass:70,rush:28,recv:0,passD:0,rushD:0,kick:0,coach:0,years:"1972-75"},
+    {name:"Pete Johnson",pos:["RB"],pass:0,rush:82,recv:8,passD:0,rushD:0,kick:0,coach:0,years:"1973-76"},
+    {name:"Randy Gradishar",pos:["LB"],pass:0,rush:0,recv:0,passD:72,rushD:90,kick:0,coach:0,years:"1971-73"},
+    {name:"Tim Fox",pos:["S"],pass:0,rush:0,recv:0,passD:80,rushD:48,kick:0,coach:0,years:"1972-75"},
+    {name:"Bob Brudzinski",pos:["DL"],pass:0,rush:0,recv:0,passD:52,rushD:82,kick:0,coach:0,years:"1973-76"},
   ],
   "1980s": [
     {name:"Keith Byars",pos:["RB"],pass:0,rush:88,recv:22,passD:0,rushD:0,kick:0,coach:0,years:"1982-85"},
@@ -1027,6 +1087,10 @@ const PLAYERS = {
     {name:"Mike Tomczak",pos:["QB"],pass:72,rush:10,recv:0,passD:0,rushD:0,kick:0,coach:0,years:"1981-84"},
     {name:"William White",pos:["S"],pass:0,rush:0,recv:0,passD:78,rushD:42,kick:0,coach:0,years:"1984-87"},
     {name:"Matt Frantz",pos:["K"],pass:0,rush:0,recv:0,passD:0,rushD:0,kick:75,coach:0,years:"1985-88"},
+    {name:"Pepper Johnson",pos:["LB"],pass:0,rush:0,recv:0,passD:70,rushD:85,kick:0,coach:0,years:"1982-85"},
+    {name:"Marcus Marek",pos:["LB"],pass:0,rush:0,recv:0,passD:68,rushD:84,kick:0,coach:0,years:"1979-82"},
+    {name:"Jim Lachey",pos:["DL"],pass:0,rush:0,recv:0,passD:42,rushD:78,kick:0,coach:0,years:"1981-84"},
+    {name:"John Frank",pos:["WR"],pass:0,rush:2,recv:72,passD:0,rushD:0,kick:0,coach:0,years:"1980-83"},
   ],
   "1990s": [
     {name:"Eddie George",pos:["RB"],pass:0,rush:92,recv:15,passD:0,rushD:0,kick:0,coach:0,years:"1992-95"},
@@ -1037,6 +1101,10 @@ const PLAYERS = {
     {name:"Dan Stultz",pos:["K"],pass:0,rush:0,recv:0,passD:0,rushD:0,kick:75,coach:0,years:"1997-00"},
     {name:"Antoine Winfield",pos:["S"],pass:0,rush:0,recv:0,passD:82,rushD:48,kick:0,coach:0,years:"1996-98"},
     {name:"Andy Katzenmoyer",pos:["LB"],pass:0,rush:0,recv:0,passD:70,rushD:85,kick:0,coach:0,years:"1996-98"},
+    {name:"Joey Galloway",pos:["WR"],pass:0,rush:8,recv:84,passD:0,rushD:0,kick:0,coach:0,years:"1991-94"},
+    {name:"Bobby Hoying",pos:["QB"],pass:78,rush:8,recv:0,passD:0,rushD:0,kick:0,coach:0,years:"1992-95"},
+    {name:"Mike Vrabel",pos:["DL","LB"],pass:0,rush:0,recv:0,passD:58,rushD:86,kick:0,coach:0,years:"1993-96"},
+    {name:"Pepe Pearson",pos:["RB"],pass:0,rush:80,recv:10,passD:0,rushD:0,kick:0,coach:0,years:"1994-97"},
   ],
   "2000s": [
     {name:"Troy Smith",pos:["QB"],pass:82,rush:30,recv:0,passD:0,rushD:0,kick:0,coach:0,years:"2003-06"},
@@ -1049,6 +1117,10 @@ const PLAYERS = {
     {name:"Chris Gamble",pos:["S"],pass:0,rush:0,recv:0,passD:82,rushD:42,kick:0,coach:0,years:"2001-03"},
     {name:"Chris Wells",pos:["RB"],pass:0,rush:85,recv:10,passD:0,rushD:0,kick:0,coach:0,years:"2006-08"},
     {name:"Vernon Gholston",pos:["DL"],pass:0,rush:0,recv:0,passD:55,rushD:85,kick:0,coach:0,years:"2004-07"},
+    {name:"Santonio Holmes",pos:["WR"],pass:0,rush:5,recv:84,passD:0,rushD:0,kick:0,coach:0,years:"2003-05"},
+    {name:"Will Smith",pos:["DL"],pass:0,rush:0,recv:0,passD:55,rushD:84,kick:0,coach:0,years:"2000-03"},
+    {name:"Antoine Winfield",pos:["S"],pass:0,rush:0,recv:0,passD:80,rushD:46,kick:0,coach:0,years:"2002-04"},
+    {name:"Mike Doss",pos:["S"],pass:0,rush:0,recv:0,passD:82,rushD:55,kick:0,coach:0,years:"1999-02"},
   ],
   "2010s": [
     {name:"J.T. Barrett",pos:["QB"],pass:80,rush:35,recv:0,passD:0,rushD:0,kick:0,coach:0,years:"2014-17"},
@@ -1062,6 +1134,10 @@ const PLAYERS = {
     {name:"Denzel Ward",pos:["S"],pass:0,rush:0,recv:0,passD:85,rushD:40,kick:0,coach:0,years:"2015-17"},
     {name:"Jeff Okudah",pos:["S"],pass:0,rush:0,recv:0,passD:82,rushD:45,kick:0,coach:0,years:"2017-19"},
     {name:"Darron Lee",pos:["LB"],pass:0,rush:0,recv:0,passD:72,rushD:82,kick:0,coach:0,years:"2013-15"},
+    {name:"Cardale Jones",pos:["QB"],pass:80,rush:18,recv:0,passD:0,rushD:0,kick:0,coach:0,years:"2014-16"},
+    {name:"Curtis Samuel",pos:["RB","WR"],pass:0,rush:78,recv:60,passD:0,rushD:0,kick:0,coach:0,years:"2014-16"},
+    {name:"Raekwon McMillan",pos:["LB"],pass:0,rush:0,recv:0,passD:70,rushD:85,kick:0,coach:0,years:"2014-16"},
+    {name:"Vonn Bell",pos:["S"],pass:0,rush:0,recv:0,passD:82,rushD:50,kick:0,coach:0,years:"2013-15"},
   ],
   "2020s": [
     {name:"C.J. Stroud",pos:["QB"],pass:96,rush:8,recv:0,passD:0,rushD:0,kick:0,coach:0,years:"2020-22"},
@@ -1074,6 +1150,12 @@ const PLAYERS = {
     {name:"J.K. Dobbins",pos:["RB"],pass:0,rush:90,recv:12,passD:0,rushD:0,kick:0,coach:0,years:"2017-19"},
     {name:"Chris Olave",pos:["WR"],pass:0,rush:2,recv:88,passD:0,rushD:0,kick:0,coach:0,years:"2018-21"},
     {name:"Zach Harrison",pos:["DL"],pass:0,rush:0,recv:0,passD:55,rushD:82,kick:0,coach:0,years:"2019-22"},
+    {name:"Marvin Harrison Jr.",pos:["WR"],pass:0,rush:2,recv:96,passD:0,rushD:0,kick:0,coach:0,years:"2021-23"},
+    {name:"Will Howard",pos:["QB"],pass:86,rush:20,recv:0,passD:0,rushD:0,kick:0,coach:0,years:"2024"},
+    {name:"Quinshon Judkins",pos:["RB"],pass:0,rush:88,recv:18,passD:0,rushD:0,kick:0,coach:0,years:"2024"},
+    {name:"JT Tuimoloau",pos:["DL"],pass:0,rush:0,recv:0,passD:62,rushD:90,kick:0,coach:0,years:"2021-24"},
+    {name:"Emeka Egbuka",pos:["WR"],pass:0,rush:4,recv:86,passD:0,rushD:0,kick:0,coach:0,years:"2021-24"},
+    {name:"Denzel Burke",pos:["S"],pass:0,rush:0,recv:0,passD:82,rushD:48,kick:0,coach:0,years:"2021-24"},
   ],
 },
 "USC": {
@@ -1086,6 +1168,10 @@ const PLAYERS = {
     {name:"Pat Haden",pos:["QB"],pass:75,rush:10,recv:0,passD:0,rushD:0,kick:0,coach:0,years:"1972-74"},
     {name:"Frank Jordan",pos:["K"],pass:0,rush:0,recv:0,passD:0,rushD:0,kick:72,coach:0,years:"1977-79"},
     {name:"Dennis Thurman",pos:["S"],pass:0,rush:0,recv:0,passD:82,rushD:42,kick:0,coach:0,years:"1975-77"},
+    {name:"Anthony Davis",pos:["RB"],pass:0,rush:88,recv:12,passD:0,rushD:0,kick:0,coach:0,years:"1972-74"},
+    {name:"Richard Wood",pos:["LB"],pass:0,rush:0,recv:0,passD:70,rushD:84,kick:0,coach:0,years:"1972-74"},
+    {name:"Clay Matthews Jr.",pos:["LB"],pass:0,rush:0,recv:0,passD:68,rushD:82,kick:0,coach:0,years:"1974-77"},
+    {name:"Vince Evans",pos:["QB"],pass:72,rush:18,recv:0,passD:0,rushD:0,kick:0,coach:0,years:"1974-76"},
   ],
   "1980s": [
     {name:"Marcus Allen",pos:["RB"],pass:0,rush:95,recv:18,passD:0,rushD:0,kick:0,coach:0,years:"1978-81"},
@@ -1094,13 +1180,20 @@ const PLAYERS = {
     {name:"Jack Del Rio",pos:["LB"],pass:0,rush:0,recv:0,passD:68,rushD:82,kick:0,coach:0,years:"1981-84"},
     {name:"Quin Rodriguez",pos:["K"],pass:0,rush:0,recv:0,passD:0,rushD:0,kick:75,coach:0,years:"1986-89"},
     {name:"Ted Tollner",pos:["HC"],pass:0,rush:0,recv:0,passD:0,rushD:0,kick:0,coach:62,years:"1983-86"},
+    {name:"Anthony Munoz",pos:["DL"],pass:0,rush:0,recv:0,passD:42,rushD:80,kick:0,coach:0,years:"1976-79"},
+    {name:"Tim Ryan",pos:["DL"],pass:0,rush:0,recv:0,passD:52,rushD:82,kick:0,coach:0,years:"1986-89"},
+    {name:"Mark Carrier",pos:["S"],pass:0,rush:0,recv:0,passD:84,rushD:50,kick:0,coach:0,years:"1987-89"},
+    {name:"Erik Affholter",pos:["WR"],pass:0,rush:3,recv:76,passD:0,rushD:0,kick:0,coach:0,years:"1985-88"},
   ],
   "1990s": [
     {name:"Keyshawn Johnson",pos:["WR"],pass:0,rush:5,recv:88,passD:0,rushD:0,kick:0,coach:0,years:"1994-95"},
     {name:"Carson Palmer",pos:["QB"],pass:85,rush:8,recv:0,passD:0,rushD:0,kick:0,coach:0,years:"1998-02"},
     {name:"Troy Polamalu",pos:["S"],pass:0,rush:0,recv:0,passD:88,rushD:62,kick:0,coach:0,years:"1999-02"},
-    {name:"Junior Seau",pos:["LB"],pass:0,rush:0,recv:0,passD:72,rushD:90,kick:0,coach:0,years:"1987-89"},
     {name:"John Robinson",pos:["HC"],pass:0,rush:0,recv:0,passD:0,rushD:0,kick:0,coach:72,years:"1993-97"},
+    {name:"R. Jay Soward",pos:["WR"],pass:0,rush:5,recv:80,passD:0,rushD:0,kick:0,coach:0,years:"1996-99"},
+    {name:"Chris Claiborne",pos:["LB"],pass:0,rush:0,recv:0,passD:72,rushD:84,kick:0,coach:0,years:"1996-98"},
+    {name:"Delon Washington",pos:["RB"],pass:0,rush:76,recv:12,passD:0,rushD:0,kick:0,coach:0,years:"1994-97"},
+    {name:"Daylon McCutcheon",pos:["S"],pass:0,rush:0,recv:0,passD:78,rushD:40,kick:0,coach:0,years:"1995-98"},
   ],
   "2000s": [
     {name:"Matt Leinart",pos:["QB"],pass:88,rush:5,recv:0,passD:0,rushD:0,kick:0,coach:0,years:"2001-05"},
@@ -1112,6 +1205,10 @@ const PLAYERS = {
     {name:"LenDale White",pos:["RB"],pass:0,rush:82,recv:10,passD:0,rushD:0,kick:0,coach:0,years:"2003-05"},
     {name:"Steve Smith",pos:["WR"],pass:0,rush:5,recv:82,passD:0,rushD:0,kick:0,coach:0,years:"2004-06"},
     {name:"Sedrick Ellis",pos:["DL"],pass:0,rush:0,recv:0,passD:55,rushD:85,kick:0,coach:0,years:"2004-07"},
+    {name:"Carson Palmer",pos:["QB"],pass:88,rush:6,recv:0,passD:0,rushD:0,kick:0,coach:0,years:"2001-02"},
+    {name:"Dwayne Jarrett",pos:["WR"],pass:0,rush:2,recv:85,passD:0,rushD:0,kick:0,coach:0,years:"2004-06"},
+    {name:"Keith Rivers",pos:["LB"],pass:0,rush:0,recv:0,passD:72,rushD:85,kick:0,coach:0,years:"2004-07"},
+    {name:"Brian Cushing",pos:["LB"],pass:0,rush:0,recv:0,passD:70,rushD:86,kick:0,coach:0,years:"2005-08"},
   ],
   "2010s": [
     {name:"Sam Darnold",pos:["QB"],pass:80,rush:12,recv:0,passD:0,rushD:0,kick:0,coach:0,years:"2016-17"},
@@ -1120,6 +1217,10 @@ const PLAYERS = {
     {name:"Adoree' Jackson",pos:["S"],pass:0,rush:8,recv:5,passD:82,rushD:38,kick:0,coach:0,years:"2014-16"},
     {name:"Su'a Cravens",pos:["LB","S"],pass:0,rush:0,recv:0,passD:75,rushD:72,kick:0,coach:0,years:"2013-15"},
     {name:"Matt Boermeester",pos:["K"],pass:0,rush:0,recv:0,passD:0,rushD:0,kick:78,coach:0,years:"2014-16"},
+    {name:"Cody Kessler",pos:["QB"],pass:80,rush:6,recv:0,passD:0,rushD:0,kick:0,coach:0,years:"2012-15"},
+    {name:"Nelson Agholor",pos:["WR"],pass:0,rush:5,recv:82,passD:0,rushD:0,kick:0,coach:0,years:"2012-14"},
+    {name:"Leonard Williams",pos:["DL"],pass:0,rush:0,recv:0,passD:60,rushD:90,kick:0,coach:0,years:"2012-14"},
+    {name:"Marqise Lee",pos:["WR"],pass:0,rush:8,recv:84,passD:0,rushD:0,kick:0,coach:0,years:"2011-13"},
   ],
   "2020s": [
     {name:"Caleb Williams",pos:["QB"],pass:94,rush:25,recv:0,passD:0,rushD:0,kick:0,coach:0,years:"2022-23"},
@@ -1127,6 +1228,10 @@ const PLAYERS = {
     {name:"Lincoln Riley",pos:["HC"],pass:0,rush:0,recv:0,passD:0,rushD:0,kick:0,coach:80,years:"2022-"},
     {name:"Marshawn Lloyd",pos:["RB"],pass:0,rush:78,recv:15,passD:0,rushD:0,kick:0,coach:0,years:"2023"},
     {name:"Eric Gentry",pos:["LB"],pass:0,rush:0,recv:0,passD:68,rushD:78,kick:0,coach:0,years:"2022-24"},
+    {name:"Jordan Addison",pos:["WR"],pass:0,rush:3,recv:86,passD:0,rushD:0,kick:0,coach:0,years:"2022"},
+    {name:"Travis Dye",pos:["RB"],pass:0,rush:80,recv:18,passD:0,rushD:0,kick:0,coach:0,years:"2022"},
+    {name:"Denis Lynch",pos:["K"],pass:0,rush:0,recv:0,passD:0,rushD:0,kick:75,coach:0,years:"2020-23"},
+    {name:"Calen Bullock",pos:["S"],pass:0,rush:0,recv:0,passD:82,rushD:46,kick:0,coach:0,years:"2021-23"},
   ],
 },
 "Oklahoma": {
@@ -1139,6 +1244,10 @@ const PLAYERS = {
     {name:"Zac Henderson",pos:["S"],pass:0,rush:0,recv:0,passD:80,rushD:42,kick:0,coach:0,years:"1974-77"},
     {name:"Uwe von Schamann",pos:["K"],pass:0,rush:0,recv:0,passD:0,rushD:0,kick:82,coach:0,years:"1976-78"},
     {name:"Greg Pruitt",pos:["RB"],pass:0,rush:85,recv:15,passD:0,rushD:0,kick:0,coach:0,years:"1970-72"},
+    {name:"Joe Washington",pos:["RB"],pass:0,rush:86,recv:14,passD:0,rushD:0,kick:0,coach:0,years:"1972-75"},
+    {name:"Jerry Tubbs",pos:["LB"],pass:0,rush:0,recv:0,passD:66,rushD:80,kick:0,coach:0,years:"1973-76"},
+    {name:"Dewey Selmon",pos:["DL"],pass:0,rush:0,recv:0,passD:50,rushD:84,kick:0,coach:0,years:"1972-75"},
+    {name:"Thomas Lott",pos:["QB"],pass:62,rush:30,recv:0,passD:0,rushD:0,kick:0,coach:0,years:"1976-78"},
   ],
   "1980s": [
     {name:"Brian Bosworth",pos:["LB"],pass:0,rush:0,recv:0,passD:78,rushD:92,kick:0,coach:0,years:"1984-86"},
@@ -1148,6 +1257,10 @@ const PLAYERS = {
     {name:"Spencer Tillman",pos:["RB"],pass:0,rush:78,recv:15,passD:0,rushD:0,kick:0,coach:0,years:"1983-86"},
     {name:"Rickey Dixon",pos:["S"],pass:0,rush:0,recv:0,passD:85,rushD:42,kick:0,coach:0,years:"1984-87"},
     {name:"Tim Lashar",pos:["K"],pass:0,rush:0,recv:0,passD:0,rushD:0,kick:78,coach:0,years:"1984-87"},
+    {name:"Jamelle Holieway",pos:["QB"],pass:62,rush:34,recv:0,passD:0,rushD:0,kick:0,coach:0,years:"1985-88"},
+    {name:"Marcus Dupree",pos:["RB"],pass:0,rush:85,recv:8,passD:0,rushD:0,kick:0,coach:0,years:"1982-83"},
+    {name:"Dante Jones",pos:["LB"],pass:0,rush:0,recv:0,passD:68,rushD:84,kick:0,coach:0,years:"1984-87"},
+    {name:"Sonny Brown",pos:["S"],pass:0,rush:0,recv:0,passD:78,rushD:44,kick:0,coach:0,years:"1983-86"},
   ],
   "1990s": [
     {name:"Tommie Harris",pos:["DL"],pass:0,rush:0,recv:0,passD:55,rushD:82,kick:0,coach:0,years:"1998-03"},
@@ -1156,6 +1269,10 @@ const PLAYERS = {
     {name:"Derrick Strait",pos:["S"],pass:0,rush:0,recv:0,passD:82,rushD:40,kick:0,coach:0,years:"1999-03"},
     {name:"Bob Stoops",pos:["HC"],pass:0,rush:0,recv:0,passD:0,rushD:0,kick:0,coach:90,years:"1999-16"},
     {name:"Tim Duncan",pos:["K"],pass:0,rush:0,recv:0,passD:0,rushD:0,kick:80,coach:0,years:"1997-00"},
+    {name:"Josh Heupel",pos:["QB"],pass:84,rush:5,recv:0,passD:0,rushD:0,kick:0,coach:0,years:"1999-00"},
+    {name:"Cale Gundy",pos:["QB"],pass:74,rush:8,recv:0,passD:0,rushD:0,kick:0,coach:0,years:"1990-93"},
+    {name:"Cedric Jones",pos:["DL"],pass:0,rush:0,recv:0,passD:55,rushD:84,kick:0,coach:0,years:"1992-95"},
+    {name:"Stephen Alexander",pos:["WR"],pass:0,rush:2,recv:76,passD:0,rushD:0,kick:0,coach:0,years:"1994-97"},
   ],
   "2000s": [
     {name:"Sam Bradford",pos:["QB"],pass:92,rush:5,recv:0,passD:0,rushD:0,kick:0,coach:0,years:"2006-09"},
@@ -1164,6 +1281,10 @@ const PLAYERS = {
     {name:"Mark Clayton",pos:["WR"],pass:0,rush:3,recv:82,passD:0,rushD:0,kick:0,coach:0,years:"2001-04"},
     {name:"Garrett Hartley",pos:["K"],pass:0,rush:0,recv:0,passD:0,rushD:0,kick:78,coach:0,years:"2003-06"},
     {name:"Roy Williams",pos:["S"],pass:0,rush:0,recv:0,passD:82,rushD:55,kick:0,coach:0,years:"1999-01"},
+    {name:"Jason White",pos:["QB"],pass:86,rush:4,recv:0,passD:0,rushD:0,kick:0,coach:0,years:"2001-04"},
+    {name:"DeMarco Murray",pos:["RB"],pass:0,rush:86,recv:20,passD:0,rushD:0,kick:0,coach:0,years:"2007-10"},
+    {name:"Rufus Alexander",pos:["LB"],pass:0,rush:0,recv:0,passD:66,rushD:82,kick:0,coach:0,years:"2002-06"},
+    {name:"Jermaine Gresham",pos:["WR"],pass:0,rush:2,recv:80,passD:0,rushD:0,kick:0,coach:0,years:"2006-09"},
   ],
   "2010s": [
     {name:"Baker Mayfield",pos:["QB"],pass:94,rush:22,recv:0,passD:0,rushD:0,kick:0,coach:0,years:"2015-17"},
@@ -1175,12 +1296,20 @@ const PLAYERS = {
     {name:"Austin Seibert",pos:["K"],pass:0,rush:0,recv:0,passD:0,rushD:0,kick:82,coach:0,years:"2015-18"},
     {name:"Kenneth Murray",pos:["LB"],pass:0,rush:0,recv:0,passD:70,rushD:85,kick:0,coach:0,years:"2017-19"},
     {name:"Obi Melifonwu",pos:["DL"],pass:0,rush:0,recv:0,passD:55,rushD:80,kick:0,coach:0,years:"2013-16"},
+    {name:"Samaje Perine",pos:["RB"],pass:0,rush:88,recv:12,passD:0,rushD:0,kick:0,coach:0,years:"2014-16"},
+    {name:"Sterling Shepard",pos:["WR"],pass:0,rush:3,recv:82,passD:0,rushD:0,kick:0,coach:0,years:"2012-15"},
+    {name:"Eric Striker",pos:["LB"],pass:0,rush:0,recv:0,passD:70,rushD:82,kick:0,coach:0,years:"2012-15"},
+    {name:"Marquise Brown",pos:["WR"],pass:0,rush:5,recv:86,passD:0,rushD:0,kick:0,coach:0,years:"2017-18"},
   ],
   "2020s": [
     {name:"Dillon Gabriel",pos:["QB"],pass:85,rush:18,recv:0,passD:0,rushD:0,kick:0,coach:0,years:"2023-24"},
     {name:"Brent Venables",pos:["HC"],pass:0,rush:0,recv:0,passD:0,rushD:0,kick:0,coach:75,years:"2022-"},
     {name:"Billy Bowman Jr.",pos:["S"],pass:0,rush:0,recv:0,passD:80,rushD:48,kick:0,coach:0,years:"2021-24"},
     {name:"Gavin Sawchuk",pos:["RB"],pass:0,rush:78,recv:12,passD:0,rushD:0,kick:0,coach:0,years:"2022-24"},
+    {name:"Spencer Rattler",pos:["QB"],pass:84,rush:10,recv:0,passD:0,rushD:0,kick:0,coach:0,years:"2019-21"},
+    {name:"Marvin Mims",pos:["WR"],pass:0,rush:4,recv:84,passD:0,rushD:0,kick:0,coach:0,years:"2020-22"},
+    {name:"Perrion Winfrey",pos:["DL"],pass:0,rush:0,recv:0,passD:55,rushD:84,kick:0,coach:0,years:"2020-21"},
+    {name:"Zach Schmit",pos:["K"],pass:0,rush:0,recv:0,passD:0,rushD:0,kick:76,coach:0,years:"2021-24"},
   ],
 },
 "Notre Dame": {
@@ -2101,7 +2230,7 @@ let hasSpun = false;
 let usedDecades = [];
 
 const roster = {};
-POSITIONS.forEach(p => roster[p] = null);
+SLOTS.forEach(s => roster[s] = null);
 
 function setMode(mode) {
   gameMode = mode;
@@ -2119,7 +2248,7 @@ function startGame() {
   teamSkipUsed = false;
   decadeSkipUsed = false;
   usedDecades = [];
-  POSITIONS.forEach(p => roster[p] = null);
+  SLOTS.forEach(s => roster[s] = null);
   updateRosterUI();
   updateStrength();
   document.getElementById('spinBtn').disabled = false;
@@ -2238,22 +2367,19 @@ function selectPlayer(idx) {
 function highlightValidPositions() {
   document.querySelectorAll('.roster-slot').forEach(s => s.classList.remove('highlight'));
   if (!selectedPlayer) return;
-  getValidPositions(selectedPlayer).forEach(pos => {
-    if (!roster[pos]) document.getElementById(`slot-${pos}`).classList.add('highlight');
+  getValidSlots(selectedPlayer).forEach(slot => {
+    document.getElementById(`slot-${slot}`).classList.add('highlight');
   });
 }
 
-function getValidPositions(player) {
-  const valid = [];
-  player.pos.forEach(p => {
-    if (POSITIONS.includes(p) && !valid.includes(p)) valid.push(p);
-  });
-  return valid;
+// Slots this player can fill that are still empty
+function getValidSlots(player) {
+  return SLOTS.filter(slot => !roster[slot] && player.pos.includes(SLOT_BASE(slot)));
 }
 
 function selectSlot(position) {
   if (!selectedPlayer || roster[position]) return;
-  if (!getValidPositions(selectedPlayer).includes(position)) return;
+  if (!selectedPlayer.pos.includes(SLOT_BASE(position))) return;
 
   roster[position] = { ...selectedPlayer, team: currentTeam, decade: currentDecade };
   usedDecades.push(currentDecade);
@@ -2283,15 +2409,15 @@ function selectSlot(position) {
 
 function updateRosterUI() {
   const labels = {QB:'Quarterback',RB:'Running Back',WR:'Wide Receiver / TE',DL:'Defensive Line',LB:'Linebacker',S:'Safety / CB',K:'Kicker / Punter',HC:'Head Coach'};
-  POSITIONS.forEach(pos => {
-    const slot = document.getElementById(`slot-${pos}`);
+  SLOTS.forEach(slotId => {
+    const slot = document.getElementById(`slot-${slotId}`);
     const info = slot.querySelector('.slot-player-info');
-    if (roster[pos]) {
+    if (roster[slotId]) {
       slot.classList.add('filled');
-      info.innerHTML = `<div class="slot-player-name">${roster[pos].name}</div><div class="slot-player-detail">${roster[pos].team} · ${roster[pos].decade}</div>`;
+      info.innerHTML = `<div class="slot-player-name">${roster[slotId].name}</div><div class="slot-player-detail">${roster[slotId].team} · ${roster[slotId].decade}</div>`;
     } else {
       slot.classList.remove('filled');
-      info.innerHTML = `<div class="slot-empty">${labels[pos]}</div>`;
+      info.innerHTML = `<div class="slot-empty">${labels[SLOT_BASE(slotId)]}</div>`;
     }
   });
 }
@@ -2302,7 +2428,7 @@ function updateStrength() {
     if (p) { pass+=p.pass; rush+=p.rush; recv+=p.recv; passD+=p.passD; rushD+=p.rushD; kick+=p.kick; coach+=p.coach; }
   });
   const total = pass+rush+recv+passD+rushD+kick+coach;
-  const maxPossible = 750;
+  const maxPossible = 1300;
   const rating = Math.min(100, Math.round((total/maxPossible)*100));
 
   document.getElementById('strengthVal').textContent = rating;
@@ -2379,11 +2505,11 @@ function simulate() {
   const adjustedTotal = total + balanceBonus + coachBoost + kickBoost;
 
   let baseWinPct;
-  if (adjustedTotal >= 620) baseWinPct = 1.0;
-  else if (adjustedTotal >= 550) baseWinPct = 0.93 + (adjustedTotal-550)/1000;
-  else if (adjustedTotal >= 450) baseWinPct = 0.78 + (adjustedTotal-450)/667;
-  else if (adjustedTotal >= 350) baseWinPct = 0.55 + (adjustedTotal-350)/435;
-  else baseWinPct = 0.25 + (adjustedTotal/1000);
+  if (adjustedTotal >= 1080) baseWinPct = 1.0;
+  else if (adjustedTotal >= 950) baseWinPct = 0.93 + (adjustedTotal-950)/1800;
+  else if (adjustedTotal >= 780) baseWinPct = 0.78 + (adjustedTotal-780)/1130;
+  else if (adjustedTotal >= 600) baseWinPct = 0.55 + (adjustedTotal-600)/785;
+  else baseWinPct = 0.25 + (adjustedTotal/1800);
 
   let wins=0, losses=0, gameNum=0;
 
@@ -2421,14 +2547,14 @@ function showResults(wins, losses) {
 
   const rosterDiv = document.getElementById('resultRoster');
   rosterDiv.innerHTML = '';
-  POSITIONS.forEach(pos => {
-    const p = roster[pos];
-    if (p) rosterDiv.innerHTML += `<div class="result-player"><span class="result-player-pos">${pos}</span><span class="result-player-name">${p.name}</span><span class="result-player-team">${p.team} ${p.decade}</span></div>`;
+  SLOTS.forEach(slotId => {
+    const p = roster[slotId];
+    if (p) rosterDiv.innerHTML += `<div class="result-player"><span class="result-player-pos">${SLOT_BASE(slotId)}</span><span class="result-player-name">${p.name}</span><span class="result-player-team">${p.team} ${p.decade}</span></div>`;
   });
 
   let total = 0;
   Object.values(roster).forEach(p => { if (p) total += p.pass+p.rush+p.recv+p.passD+p.rushD+p.kick+p.coach; });
-  const rating = Math.min(100, Math.round((total/750)*100));
+  const rating = Math.min(100, Math.round((total/1300)*100));
   document.getElementById('resultStrength').innerHTML = `Strength Rating: <span>${rating}</span>`;
   overlay.classList.add('show');
 }
