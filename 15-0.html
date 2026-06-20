@@ -1,0 +1,2172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>15-0 — College Football All-Time Roster Builder</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg-primary: #0a0a0f;
+      --bg-secondary: #12121a;
+      --bg-card: #1a1a2e;
+      --bg-card-hover: #222240;
+      --accent: #c8102e;
+      --accent-glow: rgba(200, 16, 46, 0.4);
+      --gold: #d4af37;
+      --gold-glow: rgba(212, 175, 55, 0.3);
+      --text-primary: #ffffff;
+      --text-secondary: #a0a0b8;
+      --text-muted: #606078;
+      --border: #2a2a3e;
+      --success: #22c55e;
+      --danger: #ef4444;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .bg-pattern {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background:
+        radial-gradient(ellipse at 20% 50%, rgba(200, 16, 46, 0.06) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 20%, rgba(212, 175, 55, 0.04) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 20px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Header */
+    header {
+      text-align: center;
+      padding: 40px 0 20px;
+    }
+
+    .logo {
+      font-family: 'Oswald', sans-serif;
+      font-size: 5rem;
+      font-weight: 700;
+      letter-spacing: -2px;
+      background: linear-gradient(135deg, var(--text-primary) 0%, var(--gold) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      line-height: 1;
+    }
+
+    .subtitle {
+      font-family: 'Oswald', sans-serif;
+      font-size: 1rem;
+      letter-spacing: 6px;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+      margin-top: 4px;
+    }
+
+    .tagline {
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      margin-top: 12px;
+    }
+
+    /* Mode Toggle */
+    .mode-toggle {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin: 20px 0;
+    }
+
+    .mode-btn {
+      font-family: 'Oswald', sans-serif;
+      padding: 8px 24px;
+      border: 1px solid var(--border);
+      background: var(--bg-secondary);
+      color: var(--text-secondary);
+      cursor: pointer;
+      font-size: 0.85rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      transition: all 0.2s;
+      border-radius: 4px;
+    }
+
+    .mode-btn.active {
+      background: var(--accent);
+      color: white;
+      border-color: var(--accent);
+    }
+
+    .mode-btn:hover:not(.active) {
+      border-color: var(--text-muted);
+      color: var(--text-primary);
+    }
+
+    /* Game Area */
+    .game-area {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-top: 20px;
+    }
+
+    @media (max-width: 768px) {
+      .game-area { grid-template-columns: 1fr; }
+      .logo { font-size: 3.5rem; }
+    }
+
+    /* Slot Machine */
+    .slot-section {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .round-indicator {
+      text-align: center;
+      font-family: 'Oswald', sans-serif;
+      font-size: 0.85rem;
+      letter-spacing: 3px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+
+    .round-indicator span {
+      color: var(--gold);
+    }
+
+    .slot-machine {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+
+    .slot-window {
+      width: 160px;
+      height: 80px;
+      background: var(--bg-primary);
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .slot-window::before,
+    .slot-window::after {
+      content: '';
+      position: absolute;
+      left: 0; right: 0;
+      height: 20px;
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    .slot-window::before {
+      top: 0;
+      background: linear-gradient(to bottom, var(--bg-primary), transparent);
+    }
+
+    .slot-window::after {
+      bottom: 0;
+      background: linear-gradient(to top, var(--bg-primary), transparent);
+    }
+
+    .slot-content {
+      font-family: 'Oswald', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 600;
+      text-align: center;
+      color: var(--text-primary);
+      transition: transform 0.1s;
+    }
+
+    .slot-content.spinning {
+      animation: slotSpin 0.1s linear infinite;
+    }
+
+    @keyframes slotSpin {
+      0% { transform: translateY(-10px); opacity: 0.5; }
+      50% { transform: translateY(0); opacity: 1; }
+      100% { transform: translateY(10px); opacity: 0.5; }
+    }
+
+    .slot-label {
+      font-size: 0.7rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      text-align: center;
+      margin-top: -8px;
+      margin-bottom: 16px;
+      display: flex;
+      justify-content: center;
+      gap: 148px;
+    }
+
+    .spin-btn {
+      display: block;
+      width: 100%;
+      padding: 14px;
+      font-family: 'Oswald', sans-serif;
+      font-size: 1.2rem;
+      font-weight: 600;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 0 4px 20px var(--accent-glow);
+    }
+
+    .spin-btn:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 30px var(--accent-glow);
+    }
+
+    .spin-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .skip-btns {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .skip-btn {
+      flex: 1;
+      padding: 8px;
+      font-family: 'Oswald', sans-serif;
+      font-size: 0.75rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      background: transparent;
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .skip-btn:hover:not(:disabled) {
+      color: var(--text-primary);
+      border-color: var(--text-muted);
+    }
+
+    .skip-btn:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+
+    .skip-btn .used {
+      color: var(--danger);
+      font-size: 0.65rem;
+    }
+
+    /* Player List */
+    .player-list {
+      margin-top: 20px;
+    }
+
+    .player-list h3 {
+      font-family: 'Oswald', sans-serif;
+      font-size: 0.8rem;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+    }
+
+    .player-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 16px;
+      margin-bottom: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .player-card:hover {
+      background: var(--bg-card-hover);
+      border-color: var(--accent);
+      transform: translateX(4px);
+    }
+
+    .player-card.selected {
+      border-color: var(--gold);
+      background: rgba(212, 175, 55, 0.08);
+    }
+
+    .player-info {
+      flex: 1;
+    }
+
+    .player-name {
+      font-family: 'Oswald', sans-serif;
+      font-size: 1rem;
+      font-weight: 600;
+    }
+
+    .player-meta {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      margin-top: 2px;
+    }
+
+    .player-pos {
+      font-family: 'Oswald', sans-serif;
+      font-size: 0.75rem;
+      letter-spacing: 1px;
+      padding: 2px 8px;
+      background: rgba(200, 16, 46, 0.15);
+      color: var(--accent);
+      border-radius: 4px;
+    }
+
+    .player-stats {
+      display: flex;
+      gap: 12px;
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .player-stats span {
+      color: var(--text-secondary);
+    }
+
+    .hidden-stats .player-stats {
+      display: none;
+    }
+
+    /* Roster Section */
+    .roster-section {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .roster-title {
+      font-family: 'Oswald', sans-serif;
+      font-size: 0.85rem;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      text-align: center;
+      margin-bottom: 16px;
+    }
+
+    .roster-slot {
+      background: var(--bg-card);
+      border: 2px dashed var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      min-height: 72px;
+      transition: all 0.3s;
+      cursor: pointer;
+    }
+
+    .roster-slot.filled {
+      border-style: solid;
+      border-color: var(--border);
+    }
+
+    .roster-slot.active {
+      border-color: var(--gold);
+      border-style: solid;
+      box-shadow: 0 0 20px var(--gold-glow);
+    }
+
+    .roster-slot.highlight {
+      border-color: var(--accent);
+      border-style: solid;
+    }
+
+    .slot-position {
+      font-family: 'Oswald', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      width: 36px;
+      text-align: center;
+    }
+
+    .roster-slot.filled .slot-position {
+      color: var(--gold);
+    }
+
+    .slot-player-info {
+      flex: 1;
+    }
+
+    .slot-empty {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      font-style: italic;
+    }
+
+    .slot-player-name {
+      font-family: 'Oswald', sans-serif;
+      font-size: 1rem;
+      font-weight: 600;
+    }
+
+    .slot-player-detail {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+    }
+
+    /* Strength Meter */
+    .strength-section {
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+    }
+
+    .strength-label {
+      font-family: 'Oswald', sans-serif;
+      font-size: 0.75rem;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+
+    .strength-value {
+      color: var(--gold);
+      font-size: 1rem;
+    }
+
+    .strength-bar {
+      height: 8px;
+      background: var(--bg-primary);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .strength-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--gold));
+      border-radius: 4px;
+      transition: width 0.5s ease;
+      width: 0%;
+    }
+
+    .stat-breakdown {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .stat-item {
+      text-align: center;
+      padding: 8px 4px;
+      background: var(--bg-card);
+      border-radius: 6px;
+    }
+
+    .stat-item-label {
+      font-size: 0.6rem;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    .stat-item-value {
+      font-family: 'Oswald', sans-serif;
+      font-size: 1rem;
+      color: var(--text-primary);
+      margin-top: 2px;
+    }
+
+    /* Simulate Button */
+    .simulate-btn {
+      display: block;
+      width: 100%;
+      padding: 16px;
+      margin-top: 20px;
+      font-family: 'Oswald', sans-serif;
+      font-size: 1.3rem;
+      font-weight: 700;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      background: linear-gradient(135deg, var(--accent), #e8243c);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 4px 25px var(--accent-glow);
+    }
+
+    .simulate-btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 35px var(--accent-glow);
+    }
+
+    .simulate-btn:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+
+    /* Results Overlay */
+    .results-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.85);
+      z-index: 100;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .results-overlay.show {
+      display: flex;
+    }
+
+    .results-card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 40px;
+      max-width: 520px;
+      width: 100%;
+      text-align: center;
+      animation: resultSlide 0.5s ease;
+    }
+
+    @keyframes resultSlide {
+      from { transform: scale(0.8); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    .result-record {
+      font-family: 'Oswald', sans-serif;
+      font-size: 5rem;
+      font-weight: 700;
+      line-height: 1;
+      margin-bottom: 8px;
+    }
+
+    .result-perfect {
+      color: var(--gold);
+      text-shadow: 0 0 40px var(--gold-glow);
+    }
+
+    .result-great {
+      color: var(--success);
+    }
+
+    .result-good {
+      color: var(--text-primary);
+    }
+
+    .result-bad {
+      color: var(--danger);
+    }
+
+    .result-message {
+      font-family: 'Oswald', sans-serif;
+      font-size: 1.2rem;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+      margin-bottom: 24px;
+    }
+
+    .result-roster {
+      text-align: left;
+      margin-bottom: 24px;
+    }
+
+    .result-player {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.9rem;
+    }
+
+    .result-player:last-child {
+      border-bottom: none;
+    }
+
+    .result-player-pos {
+      color: var(--gold);
+      font-family: 'Oswald', sans-serif;
+      width: 30px;
+    }
+
+    .result-player-name {
+      flex: 1;
+      margin-left: 8px;
+    }
+
+    .result-player-team {
+      color: var(--text-muted);
+      font-size: 0.8rem;
+    }
+
+    .result-strength {
+      font-family: 'Oswald', sans-serif;
+      font-size: 0.8rem;
+      letter-spacing: 2px;
+      color: var(--text-muted);
+      margin-bottom: 24px;
+    }
+
+    .result-strength span {
+      color: var(--gold);
+      font-size: 1.2rem;
+    }
+
+    .play-again-btn {
+      padding: 14px 40px;
+      font-family: 'Oswald', sans-serif;
+      font-size: 1rem;
+      font-weight: 600;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .play-again-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 20px var(--accent-glow);
+    }
+
+    /* Simulation animation */
+    .sim-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.9);
+      z-index: 99;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+    }
+
+    .sim-overlay.show {
+      display: flex;
+    }
+
+    .sim-text {
+      font-family: 'Oswald', sans-serif;
+      font-size: 1.2rem;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+      margin-bottom: 20px;
+    }
+
+    .sim-record {
+      font-family: 'Oswald', sans-serif;
+      font-size: 4rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .sim-week {
+      font-family: 'Oswald', sans-serif;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      letter-spacing: 2px;
+      margin-top: 8px;
+    }
+
+    /* Start screen */
+    .start-screen {
+      text-align: center;
+      padding: 60px 20px;
+    }
+
+    .start-screen .logo {
+      font-size: 7rem;
+    }
+
+    .start-desc {
+      max-width: 500px;
+      margin: 20px auto;
+      color: var(--text-secondary);
+      line-height: 1.7;
+      font-size: 0.95rem;
+    }
+
+    .start-btn {
+      display: inline-block;
+      padding: 16px 60px;
+      margin-top: 30px;
+      font-family: 'Oswald', sans-serif;
+      font-size: 1.3rem;
+      font-weight: 600;
+      letter-spacing: 5px;
+      text-transform: uppercase;
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 4px 30px var(--accent-glow);
+    }
+
+    .start-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 40px var(--accent-glow);
+    }
+
+    .how-to-play {
+      max-width: 600px;
+      margin: 40px auto 0;
+      text-align: left;
+    }
+
+    .how-to-play h3 {
+      font-family: 'Oswald', sans-serif;
+      font-size: 0.85rem;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+      text-align: center;
+    }
+
+    .step {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 16px;
+      align-items: flex-start;
+    }
+
+    .step-num {
+      font-family: 'Oswald', sans-serif;
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--accent);
+      min-width: 30px;
+    }
+
+    .step-text {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+
+    .step-text strong {
+      color: var(--text-primary);
+    }
+
+    .hidden { display: none !important; }
+
+    /* Footer link */
+    .footer-link {
+      text-align: center;
+      padding: 30px 0;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .footer-link a {
+      color: var(--text-muted);
+      text-decoration: none;
+    }
+
+    .footer-link a:hover {
+      color: var(--text-secondary);
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-pattern"></div>
+
+  <!-- Start Screen -->
+  <div class="container" id="startScreen">
+    <div class="start-screen">
+      <div class="logo">15-0</div>
+      <div class="subtitle">College Football</div>
+      <p class="start-desc">
+        Build the ultimate all-time college football roster. Spin the slot machine, get a random program and decade, and draft one legend per round. Can your squad run the table?
+      </p>
+      <button class="start-btn" onclick="startGame()">Play</button>
+      <div class="how-to-play">
+        <h3>How to Play</h3>
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-text"><strong>Spin</strong> the slot machine to get a random college program and decade.</div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-text"><strong>Pick</strong> one player from that program's era and assign them to a position on your roster.</div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-text"><strong>Repeat</strong> for 5 rounds to fill QB, RB, WR, DL, and LB.</div>
+        </div>
+        <div class="step">
+          <div class="step-num">4</div>
+          <div class="step-text"><strong>Simulate</strong> a 15-game season. Your Strength Rating determines your record.</div>
+        </div>
+        <div class="step">
+          <div class="step-num">*</div>
+          <div class="step-text">You get <strong>1 team skip</strong> and <strong>1 decade re-spin</strong>. Use them wisely.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Game Screen -->
+  <div class="container hidden" id="gameScreen">
+    <header>
+      <div class="logo">15-0</div>
+      <div class="subtitle">College Football</div>
+    </header>
+
+    <div class="mode-toggle">
+      <button class="mode-btn active" onclick="setMode('classic')" id="classicBtn">Classic</button>
+      <button class="mode-btn" onclick="setMode('blind')" id="blindBtn">Blind</button>
+    </div>
+
+    <div class="game-area">
+      <!-- Left: Slot + Players -->
+      <div class="slot-section">
+        <div class="round-indicator">Round <span id="roundNum">1</span> of 5</div>
+
+        <div class="slot-machine">
+          <div class="slot-window">
+            <div class="slot-content" id="slotTeam">—</div>
+          </div>
+          <div class="slot-window">
+            <div class="slot-content" id="slotDecade">—</div>
+          </div>
+        </div>
+        <div class="slot-label">
+          <span>Program</span>
+          <span>Decade</span>
+        </div>
+
+        <button class="spin-btn" id="spinBtn" onclick="spin()">Spin</button>
+
+        <div class="skip-btns" id="skipBtns">
+          <button class="skip-btn" id="teamSkipBtn" onclick="skipTeam()">
+            Skip Team <span id="teamSkipStatus"></span>
+          </button>
+          <button class="skip-btn" id="decadeSkipBtn" onclick="skipDecade()">
+            Re-spin Decade <span id="decadeSkipStatus"></span>
+          </button>
+        </div>
+
+        <div class="player-list hidden" id="playerList">
+          <h3>Choose a Player</h3>
+          <div id="playerCards"></div>
+        </div>
+      </div>
+
+      <!-- Right: Roster -->
+      <div class="roster-section">
+        <div class="roster-title">Your Roster</div>
+
+        <div class="roster-slot" id="slot-QB" onclick="selectSlot('QB')">
+          <div class="slot-position">QB</div>
+          <div class="slot-player-info">
+            <div class="slot-empty">Quarterback</div>
+          </div>
+        </div>
+
+        <div class="roster-slot" id="slot-RB" onclick="selectSlot('RB')">
+          <div class="slot-position">RB</div>
+          <div class="slot-player-info">
+            <div class="slot-empty">Running Back</div>
+          </div>
+        </div>
+
+        <div class="roster-slot" id="slot-WR" onclick="selectSlot('WR')">
+          <div class="slot-position">WR</div>
+          <div class="slot-player-info">
+            <div class="slot-empty">Wide Receiver</div>
+          </div>
+        </div>
+
+        <div class="roster-slot" id="slot-DL" onclick="selectSlot('DL')">
+          <div class="slot-position">DL</div>
+          <div class="slot-player-info">
+            <div class="slot-empty">Defensive Line</div>
+          </div>
+        </div>
+
+        <div class="roster-slot" id="slot-LB" onclick="selectSlot('LB')">
+          <div class="slot-position">LB</div>
+          <div class="slot-player-info">
+            <div class="slot-empty">Linebacker / DB</div>
+          </div>
+        </div>
+
+        <!-- Strength -->
+        <div class="strength-section">
+          <div class="strength-label">
+            <span>Strength Rating</span>
+            <span class="strength-value" id="strengthVal">0</span>
+          </div>
+          <div class="strength-bar">
+            <div class="strength-fill" id="strengthFill"></div>
+          </div>
+          <div class="stat-breakdown">
+            <div class="stat-item">
+              <div class="stat-item-label">Pass</div>
+              <div class="stat-item-value" id="statPass">0</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-item-label">Rush</div>
+              <div class="stat-item-value" id="statRush">0</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-item-label">Recv</div>
+              <div class="stat-item-value" id="statRecv">0</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-item-label">Pass D</div>
+              <div class="stat-item-value" id="statPassD">0</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-item-label">Rush D</div>
+              <div class="stat-item-value" id="statRushD">0</div>
+            </div>
+          </div>
+        </div>
+
+        <button class="simulate-btn" id="simBtn" onclick="simulate()" disabled>
+          Simulate Season
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Simulation Overlay -->
+  <div class="sim-overlay" id="simOverlay">
+    <div class="sim-text">Simulating Season...</div>
+    <div class="sim-record" id="simRecord">0-0</div>
+    <div class="sim-week" id="simWeek"></div>
+  </div>
+
+  <!-- Results Overlay -->
+  <div class="results-overlay" id="resultsOverlay">
+    <div class="results-card">
+      <div class="result-record" id="resultRecord"></div>
+      <div class="result-message" id="resultMessage"></div>
+      <div class="result-roster" id="resultRoster"></div>
+      <div class="result-strength" id="resultStrength"></div>
+      <button class="play-again-btn" onclick="playAgain()">Play Again</button>
+    </div>
+  </div>
+
+  <div class="footer-link">
+    <p>Inspired by <a href="https://www.82-0.com/" target="_blank">82-0</a></p>
+  </div>
+
+<script>
+const TEAMS = [
+  "Alabama","Ohio State","USC","Oklahoma","Notre Dame","Michigan","LSU",
+  "Texas","Florida","Georgia","Clemson","Nebraska","Miami (FL)","Penn State",
+  "Florida State","Auburn","Tennessee","Oregon","Wisconsin","Texas A&M",
+  "Michigan State","Ole Miss","Colorado","Pittsburgh","Virginia Tech"
+];
+
+const DECADES = ["1970s","1980s","1990s","2000s","2010s","2020s"];
+
+const PLAYERS = {
+  "Alabama": {
+    "1970s": [
+      {name:"Ozzie Newsome",pos:["WR"],pass:0,rush:0,recv:82,passD:0,rushD:0,years:"1974-77"},
+      {name:"Johnny Musso",pos:["RB"],pass:0,rush:85,recv:10,passD:0,rushD:0,years:"1969-71"},
+      {name:"Barry Krauss",pos:["LB"],pass:0,rush:0,recv:0,passD:72,rushD:80,years:"1976-78"},
+    ],
+    "1980s": [
+      {name:"Cornelius Bennett",pos:["LB","DL"],pass:0,rush:0,recv:0,passD:65,rushD:92,years:"1983-86"},
+      {name:"Bobby Humphrey",pos:["RB"],pass:0,rush:88,recv:12,passD:0,rushD:0,years:"1985-88"},
+      {name:"Derrick Thomas",pos:["LB","DL"],pass:0,rush:0,recv:0,passD:70,rushD:95,years:"1985-88"},
+    ],
+    "1990s": [
+      {name:"Jay Barker",pos:["QB"],pass:70,rush:15,recv:0,passD:0,rushD:0,years:"1991-94"},
+      {name:"Shaun Alexander",pos:["RB"],pass:0,rush:90,recv:15,passD:0,rushD:0,years:"1996-99"},
+      {name:"John Copeland",pos:["DL"],pass:0,rush:0,recv:0,passD:55,rushD:88,years:"1990-92"},
+    ],
+    "2000s": [
+      {name:"Mark Ingram",pos:["RB"],pass:0,rush:87,recv:18,passD:0,rushD:0,years:"2008-10"},
+      {name:"Julio Jones",pos:["WR"],pass:0,rush:5,recv:80,passD:0,rushD:0,years:"2008-10"},
+      {name:"Rolando McClain",pos:["LB"],pass:0,rush:0,recv:0,passD:75,rushD:85,years:"2007-09"},
+    ],
+    "2010s": [
+      {name:"Tua Tagovailoa",pos:["QB"],pass:95,rush:12,recv:0,passD:0,rushD:0,years:"2017-19"},
+      {name:"Derrick Henry",pos:["RB"],pass:0,rush:96,recv:8,passD:0,rushD:0,years:"2013-15"},
+      {name:"Amari Cooper",pos:["WR"],pass:0,rush:5,recv:92,passD:0,rushD:0,years:"2012-14"},
+      {name:"Jonathan Allen",pos:["DL"],pass:0,rush:0,recv:0,passD:60,rushD:93,years:"2013-16"},
+    ],
+    "2020s": [
+      {name:"Bryce Young",pos:["QB"],pass:93,rush:18,recv:0,passD:0,rushD:0,years:"2020-22"},
+      {name:"Will Anderson Jr.",pos:["DL","LB"],pass:0,rush:0,recv:0,passD:68,rushD:97,years:"2020-22"},
+      {name:"Jahmyr Gibbs",pos:["RB"],pass:0,rush:82,recv:30,passD:0,rushD:0,years:"2022"},
+      {name:"DeVonta Smith",pos:["WR"],pass:0,rush:3,recv:95,passD:0,rushD:0,years:"2017-20"},
+    ],
+  },
+  "Ohio State": {
+    "1970s": [
+      {name:"Archie Griffin",pos:["RB"],pass:0,rush:94,recv:12,passD:0,rushD:0,years:"1972-75"},
+      {name:"John Hicks",pos:["DL"],pass:0,rush:0,recv:0,passD:50,rushD:82,years:"1970-73"},
+      {name:"Tom Cousineau",pos:["LB"],pass:0,rush:0,recv:0,passD:70,rushD:85,years:"1975-78"},
+    ],
+    "1980s": [
+      {name:"Keith Byars",pos:["RB"],pass:0,rush:88,recv:22,passD:0,rushD:0,years:"1982-85"},
+      {name:"Cris Carter",pos:["WR"],pass:0,rush:3,recv:85,passD:0,rushD:0,years:"1984-86"},
+      {name:"Chris Spielman",pos:["LB"],pass:0,rush:0,recv:0,passD:72,rushD:90,years:"1984-87"},
+    ],
+    "1990s": [
+      {name:"Eddie George",pos:["RB"],pass:0,rush:92,recv:15,passD:0,rushD:0,years:"1992-95"},
+      {name:"Orlando Pace",pos:["DL"],pass:0,rush:0,recv:0,passD:45,rushD:80,years:"1994-96"},
+      {name:"Terry Glenn",pos:["WR"],pass:0,rush:2,recv:82,passD:0,rushD:0,years:"1993-95"},
+      {name:"Mike Vrabel",pos:["LB","DL"],pass:0,rush:0,recv:0,passD:62,rushD:82,years:"1993-96"},
+    ],
+    "2000s": [
+      {name:"Troy Smith",pos:["QB"],pass:82,rush:30,recv:0,passD:0,rushD:0,years:"2003-06"},
+      {name:"Ted Ginn Jr.",pos:["WR"],pass:0,rush:8,recv:80,passD:0,rushD:0,years:"2004-06"},
+      {name:"A.J. Hawk",pos:["LB"],pass:0,rush:0,recv:0,passD:70,rushD:86,years:"2002-05"},
+      {name:"James Laurinaitis",pos:["LB"],pass:0,rush:0,recv:0,passD:75,rushD:88,years:"2005-08"},
+    ],
+    "2010s": [
+      {name:"J.T. Barrett",pos:["QB"],pass:80,rush:35,recv:0,passD:0,rushD:0,years:"2014-17"},
+      {name:"Ezekiel Elliott",pos:["RB"],pass:0,rush:94,recv:15,passD:0,rushD:0,years:"2013-15"},
+      {name:"Michael Thomas",pos:["WR"],pass:0,rush:2,recv:82,passD:0,rushD:0,years:"2012-15"},
+      {name:"Joey Bosa",pos:["DL"],pass:0,rush:0,recv:0,passD:62,rushD:94,years:"2013-15"},
+      {name:"Chase Young",pos:["DL"],pass:0,rush:0,recv:0,passD:65,rushD:96,years:"2017-19"},
+    ],
+    "2020s": [
+      {name:"C.J. Stroud",pos:["QB"],pass:96,rush:8,recv:0,passD:0,rushD:0,years:"2020-22"},
+      {name:"Jaxon Smith-Njigba",pos:["WR"],pass:0,rush:3,recv:90,passD:0,rushD:0,years:"2020-22"},
+      {name:"Garrett Wilson",pos:["WR"],pass:0,rush:5,recv:88,passD:0,rushD:0,years:"2019-21"},
+      {name:"TreVeyon Henderson",pos:["RB"],pass:0,rush:84,recv:15,passD:0,rushD:0,years:"2021-23"},
+    ],
+  },
+  "USC": {
+    "1970s": [
+      {name:"Charles White",pos:["RB"],pass:0,rush:92,recv:10,passD:0,rushD:0,years:"1976-79"},
+      {name:"Ricky Bell",pos:["RB"],pass:0,rush:88,recv:12,passD:0,rushD:0,years:"1973-76"},
+      {name:"Lynn Swann",pos:["WR"],pass:0,rush:3,recv:80,passD:0,rushD:0,years:"1971-73"},
+      {name:"Ronnie Lott",pos:["LB"],pass:0,rush:0,recv:0,passD:90,rushD:65,years:"1977-80"},
+    ],
+    "1980s": [
+      {name:"Marcus Allen",pos:["RB"],pass:0,rush:95,recv:18,passD:0,rushD:0,years:"1978-81"},
+      {name:"Rodney Peete",pos:["QB"],pass:78,rush:25,recv:0,passD:0,rushD:0,years:"1985-88"},
+      {name:"Tim McDonald",pos:["LB"],pass:0,rush:0,recv:0,passD:80,rushD:70,years:"1983-86"},
+    ],
+    "1990s": [
+      {name:"Keyshawn Johnson",pos:["WR"],pass:0,rush:5,recv:88,passD:0,rushD:0,years:"1994-95"},
+      {name:"Carson Palmer",pos:["QB"],pass:85,rush:8,recv:0,passD:0,rushD:0,years:"1998-02"},
+      {name:"Troy Polamalu",pos:["LB"],pass:0,rush:0,recv:0,passD:88,rushD:72,years:"1999-02"},
+    ],
+    "2000s": [
+      {name:"Matt Leinart",pos:["QB"],pass:88,rush:5,recv:0,passD:0,rushD:0,years:"2001-05"},
+      {name:"Reggie Bush",pos:["RB"],pass:0,rush:88,recv:30,passD:0,rushD:0,years:"2003-05"},
+      {name:"Clay Matthews III",pos:["LB"],pass:0,rush:0,recv:0,passD:65,rushD:82,years:"2004-08"},
+      {name:"Rey Maualuga",pos:["LB"],pass:0,rush:0,recv:0,passD:70,rushD:85,years:"2005-08"},
+    ],
+    "2010s": [
+      {name:"Sam Darnold",pos:["QB"],pass:80,rush:12,recv:0,passD:0,rushD:0,years:"2016-17"},
+      {name:"JuJu Smith-Schuster",pos:["WR"],pass:0,rush:5,recv:82,passD:0,rushD:0,years:"2014-16"},
+      {name:"Ronald Jones II",pos:["RB"],pass:0,rush:82,recv:10,passD:0,rushD:0,years:"2015-17"},
+    ],
+    "2020s": [
+      {name:"Caleb Williams",pos:["QB"],pass:94,rush:25,recv:0,passD:0,rushD:0,years:"2022-23"},
+      {name:"Drake London",pos:["WR"],pass:0,rush:2,recv:88,passD:0,rushD:0,years:"2019-21"},
+      {name:"Marshawn Lloyd",pos:["RB"],pass:0,rush:78,recv:15,passD:0,rushD:0,years:"2023"},
+    ],
+  },
+  "Oklahoma": {
+    "1970s": [
+      {name:"Billy Sims",pos:["RB"],pass:0,rush:93,recv:10,passD:0,rushD:0,years:"1975-79"},
+      {name:"Greg Pruitt",pos:["RB"],pass:0,rush:85,recv:15,passD:0,rushD:0,years:"1970-72"},
+      {name:"Lee Roy Selmon",pos:["DL"],pass:0,rush:0,recv:0,passD:58,rushD:95,years:"1972-75"},
+      {name:"Rod Shoate",pos:["LB"],pass:0,rush:0,recv:0,passD:72,rushD:82,years:"1972-75"},
+    ],
+    "1980s": [
+      {name:"Brian Bosworth",pos:["LB"],pass:0,rush:0,recv:0,passD:78,rushD:92,years:"1984-86"},
+      {name:"Spencer Tillman",pos:["RB"],pass:0,rush:78,recv:15,passD:0,rushD:0,years:"1983-86"},
+      {name:"Keith Jackson",pos:["WR"],pass:0,rush:3,recv:82,passD:0,rushD:0,years:"1984-87"},
+      {name:"Tony Casillas",pos:["DL"],pass:0,rush:0,recv:0,passD:52,rushD:90,years:"1982-85"},
+    ],
+    "1990s": [
+      {name:"Tommie Harris",pos:["DL"],pass:0,rush:0,recv:0,passD:55,rushD:82,years:"1998-03"},
+      {name:"Quentin Griffin",pos:["RB"],pass:0,rush:80,recv:18,passD:0,rushD:0,years:"1999-02"},
+    ],
+    "2000s": [
+      {name:"Sam Bradford",pos:["QB"],pass:92,rush:5,recv:0,passD:0,rushD:0,years:"2006-09"},
+      {name:"Adrian Peterson",pos:["RB"],pass:0,rush:95,recv:12,passD:0,rushD:0,years:"2004-06"},
+      {name:"Gerald McCoy",pos:["DL"],pass:0,rush:0,recv:0,passD:58,rushD:88,years:"2006-09"},
+    ],
+    "2010s": [
+      {name:"Baker Mayfield",pos:["QB"],pass:94,rush:22,recv:0,passD:0,rushD:0,years:"2015-17"},
+      {name:"Kyler Murray",pos:["QB"],pass:93,rush:30,recv:0,passD:0,rushD:0,years:"2015-18"},
+      {name:"CeeDee Lamb",pos:["WR"],pass:0,rush:8,recv:90,passD:0,rushD:0,years:"2017-19"},
+      {name:"Joe Mixon",pos:["RB"],pass:0,rush:84,recv:20,passD:0,rushD:0,years:"2014-16"},
+    ],
+    "2020s": [
+      {name:"Dillon Gabriel",pos:["QB"],pass:85,rush:18,recv:0,passD:0,rushD:0,years:"2023-24"},
+      {name:"Marvin Harrison Jr.",pos:["WR"],pass:0,rush:2,recv:78,passD:0,rushD:0,years:"2020-21"},
+    ],
+  },
+  "Notre Dame": {
+    "1970s": [
+      {name:"Joe Montana",pos:["QB"],pass:82,rush:15,recv:0,passD:0,rushD:0,years:"1975-78"},
+      {name:"Joe Theismann",pos:["QB"],pass:78,rush:20,recv:0,passD:0,rushD:0,years:"1968-70"},
+      {name:"Ross Browner",pos:["DL"],pass:0,rush:0,recv:0,passD:62,rushD:90,years:"1973-77"},
+    ],
+    "1980s": [
+      {name:"Tim Brown",pos:["WR"],pass:0,rush:10,recv:88,passD:0,rushD:0,years:"1984-87"},
+      {name:"Raghib Ismail",pos:["WR"],pass:0,rush:12,recv:85,passD:0,rushD:0,years:"1988-90"},
+      {name:"Michael Stonebreaker",pos:["LB"],pass:0,rush:0,recv:0,passD:72,rushD:85,years:"1986-90"},
+    ],
+    "1990s": [
+      {name:"Rick Mirer",pos:["QB"],pass:75,rush:15,recv:0,passD:0,rushD:0,years:"1989-92"},
+      {name:"Jerome Bettis",pos:["RB"],pass:0,rush:85,recv:12,passD:0,rushD:0,years:"1990-92"},
+      {name:"Bryant Young",pos:["DL"],pass:0,rush:0,recv:0,passD:55,rushD:88,years:"1990-93"},
+    ],
+    "2000s": [
+      {name:"Brady Quinn",pos:["QB"],pass:82,rush:8,recv:0,passD:0,rushD:0,years:"2003-06"},
+      {name:"Jeff Samardzija",pos:["WR"],pass:0,rush:2,recv:82,passD:0,rushD:0,years:"2003-06"},
+      {name:"Justin Tuck",pos:["DL"],pass:0,rush:0,recv:0,passD:60,rushD:85,years:"2001-04"},
+    ],
+    "2010s": [
+      {name:"Manti Te'o",pos:["LB"],pass:0,rush:0,recv:0,passD:82,rushD:88,years:"2009-12"},
+      {name:"Will Fuller V",pos:["WR"],pass:0,rush:5,recv:82,passD:0,rushD:0,years:"2013-15"},
+      {name:"Quenton Nelson",pos:["DL"],pass:0,rush:0,recv:0,passD:42,rushD:78,years:"2014-17"},
+    ],
+    "2020s": [
+      {name:"Michael Mayer",pos:["WR"],pass:0,rush:2,recv:82,passD:0,rushD:0,years:"2020-22"},
+      {name:"Audric Estimé",pos:["RB"],pass:0,rush:80,recv:12,passD:0,rushD:0,years:"2021-23"},
+    ],
+  },
+  "Michigan": {
+    "1970s": [
+      {name:"Rick Leach",pos:["QB"],pass:72,rush:28,recv:0,passD:0,rushD:0,years:"1975-78"},
+      {name:"Rob Lytle",pos:["RB"],pass:0,rush:85,recv:15,passD:0,rushD:0,years:"1974-76"},
+      {name:"Ron Simpkins",pos:["LB"],pass:0,rush:0,recv:0,passD:68,rushD:82,years:"1976-79"},
+    ],
+    "1980s": [
+      {name:"Jim Harbaugh",pos:["QB"],pass:78,rush:15,recv:0,passD:0,rushD:0,years:"1983-86"},
+      {name:"Jamie Morris",pos:["RB"],pass:0,rush:82,recv:15,passD:0,rushD:0,years:"1984-87"},
+      {name:"Mark Messner",pos:["DL"],pass:0,rush:0,recv:0,passD:55,rushD:85,years:"1985-88"},
+    ],
+    "1990s": [
+      {name:"Charles Woodson",pos:["LB"],pass:0,rush:5,recv:15,passD:92,rushD:60,years:"1995-97"},
+      {name:"Tom Brady",pos:["QB"],pass:76,rush:5,recv:0,passD:0,rushD:0,years:"1995-99"},
+      {name:"Desmond Howard",pos:["WR"],pass:0,rush:10,recv:85,passD:0,rushD:0,years:"1989-91"},
+    ],
+    "2000s": [
+      {name:"Braylon Edwards",pos:["WR"],pass:0,rush:3,recv:85,passD:0,rushD:0,years:"2001-04"},
+      {name:"Mike Hart",pos:["RB"],pass:0,rush:85,recv:12,passD:0,rushD:0,years:"2004-07"},
+      {name:"LaMarr Woodley",pos:["DL","LB"],pass:0,rush:0,recv:0,passD:62,rushD:86,years:"2003-06"},
+    ],
+    "2010s": [
+      {name:"Jabrill Peppers",pos:["LB"],pass:0,rush:12,recv:8,passD:80,rushD:75,years:"2014-16"},
+      {name:"Rashan Gary",pos:["DL"],pass:0,rush:0,recv:0,passD:58,rushD:85,years:"2016-18"},
+      {name:"Donovan Peoples-Jones",pos:["WR"],pass:0,rush:5,recv:78,passD:0,rushD:0,years:"2017-19"},
+    ],
+    "2020s": [
+      {name:"J.J. McCarthy",pos:["QB"],pass:85,rush:15,recv:0,passD:0,rushD:0,years:"2021-23"},
+      {name:"Blake Corum",pos:["RB"],pass:0,rush:90,recv:10,passD:0,rushD:0,years:"2020-23"},
+      {name:"Aidan Hutchinson",pos:["DL"],pass:0,rush:0,recv:0,passD:62,rushD:94,years:"2019-21"},
+      {name:"Mike Sainristil",pos:["LB"],pass:0,rush:0,recv:5,passD:85,rushD:65,years:"2020-23"},
+    ],
+  },
+  "LSU": {
+    "1970s": [
+      {name:"Charles Alexander",pos:["RB"],pass:0,rush:85,recv:10,passD:0,rushD:0,years:"1975-78"},
+      {name:"Mike Williams",pos:["LB"],pass:0,rush:0,recv:0,passD:68,rushD:78,years:"1973-75"},
+    ],
+    "1980s": [
+      {name:"Dalton Hilliard",pos:["RB"],pass:0,rush:82,recv:15,passD:0,rushD:0,years:"1982-85"},
+      {name:"Eric Martin",pos:["WR"],pass:0,rush:3,recv:80,passD:0,rushD:0,years:"1981-84"},
+    ],
+    "1990s": [
+      {name:"Kevin Faulk",pos:["RB"],pass:0,rush:85,recv:18,passD:0,rushD:0,years:"1995-98"},
+      {name:"Booger McFarland",pos:["DL"],pass:0,rush:0,recv:0,passD:52,rushD:82,years:"1995-98"},
+    ],
+    "2000s": [
+      {name:"Matt Flynn",pos:["QB"],pass:78,rush:5,recv:0,passD:0,rushD:0,years:"2003-07"},
+      {name:"JaMarcus Russell",pos:["QB"],pass:82,rush:12,recv:0,passD:0,rushD:0,years:"2003-06"},
+      {name:"Glenn Dorsey",pos:["DL"],pass:0,rush:0,recv:0,passD:55,rushD:92,years:"2004-07"},
+      {name:"Patrick Peterson",pos:["LB"],pass:0,rush:5,recv:0,passD:92,rushD:55,years:"2008-10"},
+    ],
+    "2010s": [
+      {name:"Joe Burrow",pos:["QB"],pass:98,rush:15,recv:0,passD:0,rushD:0,years:"2018-19"},
+      {name:"Leonard Fournette",pos:["RB"],pass:0,rush:92,recv:10,passD:0,rushD:0,years:"2014-16"},
+      {name:"Ja'Marr Chase",pos:["WR"],pass:0,rush:3,recv:94,passD:0,rushD:0,years:"2018-19"},
+      {name:"Devin White",pos:["LB"],pass:0,rush:0,recv:0,passD:72,rushD:90,years:"2016-18"},
+      {name:"Odell Beckham Jr.",pos:["WR"],pass:0,rush:8,recv:82,passD:0,rushD:0,years:"2011-13"},
+    ],
+    "2020s": [
+      {name:"Jayden Daniels",pos:["QB"],pass:92,rush:35,recv:0,passD:0,rushD:0,years:"2022-23"},
+      {name:"Malik Nabers",pos:["WR"],pass:0,rush:5,recv:88,passD:0,rushD:0,years:"2021-23"},
+      {name:"Harold Perkins Jr.",pos:["LB"],pass:0,rush:0,recv:0,passD:68,rushD:85,years:"2022-24"},
+    ],
+  },
+  "Texas": {
+    "1970s": [
+      {name:"Earl Campbell",pos:["RB"],pass:0,rush:96,recv:5,passD:0,rushD:0,years:"1974-77"},
+      {name:"Roosevelt Leaks",pos:["RB"],pass:0,rush:82,recv:10,passD:0,rushD:0,years:"1972-74"},
+    ],
+    "1980s": [
+      {name:"Eric Metcalf",pos:["RB","WR"],pass:0,rush:78,recv:28,passD:0,rushD:0,years:"1985-88"},
+      {name:"Kenneth Sims",pos:["DL"],pass:0,rush:0,recv:0,passD:55,rushD:88,years:"1978-81"},
+    ],
+    "1990s": [
+      {name:"Ricky Williams",pos:["RB"],pass:0,rush:97,recv:12,passD:0,rushD:0,years:"1995-98"},
+      {name:"Major Applewhite",pos:["QB"],pass:78,rush:8,recv:0,passD:0,rushD:0,years:"1998-01"},
+    ],
+    "2000s": [
+      {name:"Vince Young",pos:["QB"],pass:85,rush:40,recv:0,passD:0,rushD:0,years:"2003-05"},
+      {name:"Colt McCoy",pos:["QB"],pass:88,rush:15,recv:0,passD:0,rushD:0,years:"2006-09"},
+      {name:"Derrick Johnson",pos:["LB"],pass:0,rush:0,recv:0,passD:78,rushD:88,years:"2001-04"},
+    ],
+    "2010s": [
+      {name:"Sam Ehlinger",pos:["QB"],pass:78,rush:22,recv:0,passD:0,rushD:0,years:"2017-20"},
+      {name:"D'Onta Foreman",pos:["RB"],pass:0,rush:88,recv:8,passD:0,rushD:0,years:"2014-16"},
+    ],
+    "2020s": [
+      {name:"Quinn Ewers",pos:["QB"],pass:85,rush:8,recv:0,passD:0,rushD:0,years:"2022-24"},
+      {name:"Bijan Robinson",pos:["RB"],pass:0,rush:93,recv:20,passD:0,rushD:0,years:"2020-22"},
+      {name:"Xavier Worthy",pos:["WR"],pass:0,rush:8,recv:85,passD:0,rushD:0,years:"2021-23"},
+    ],
+  },
+  "Florida": {
+    "1970s": [
+      {name:"Wes Chandler",pos:["WR"],pass:0,rush:5,recv:82,passD:0,rushD:0,years:"1974-77"},
+    ],
+    "1980s": [
+      {name:"Emmitt Smith",pos:["RB"],pass:0,rush:92,recv:12,passD:0,rushD:0,years:"1987-89"},
+      {name:"Kerwin Bell",pos:["QB"],pass:78,rush:8,recv:0,passD:0,rushD:0,years:"1984-87"},
+    ],
+    "1990s": [
+      {name:"Danny Wuerffel",pos:["QB"],pass:90,rush:5,recv:0,passD:0,rushD:0,years:"1993-96"},
+      {name:"Fred Taylor",pos:["RB"],pass:0,rush:85,recv:15,passD:0,rushD:0,years:"1994-97"},
+      {name:"Jevon Kearse",pos:["DL"],pass:0,rush:0,recv:0,passD:60,rushD:92,years:"1995-98"},
+    ],
+    "2000s": [
+      {name:"Tim Tebow",pos:["QB"],pass:85,rush:38,recv:0,passD:0,rushD:0,years:"2006-09"},
+      {name:"Percy Harvin",pos:["WR","RB"],pass:0,rush:25,recv:78,passD:0,rushD:0,years:"2006-08"},
+      {name:"Brandon Spikes",pos:["LB"],pass:0,rush:0,recv:0,passD:72,rushD:85,years:"2006-09"},
+    ],
+    "2010s": [
+      {name:"Kyle Pitts",pos:["WR"],pass:0,rush:2,recv:88,passD:0,rushD:0,years:"2018-20"},
+      {name:"Kadarius Toney",pos:["WR"],pass:0,rush:15,recv:80,passD:0,rushD:0,years:"2017-20"},
+    ],
+    "2020s": [
+      {name:"Anthony Richardson",pos:["QB"],pass:78,rush:32,recv:0,passD:0,rushD:0,years:"2020-22"},
+      {name:"Ventrell Miller",pos:["LB"],pass:0,rush:0,recv:0,passD:70,rushD:82,years:"2019-22"},
+    ],
+  },
+  "Georgia": {
+    "1970s": [
+      {name:"Herschel Walker",pos:["RB"],pass:0,rush:96,recv:8,passD:0,rushD:0,years:"1980-82"},
+    ],
+    "1980s": [
+      {name:"Kevin Butler",pos:["WR"],pass:0,rush:0,recv:55,passD:0,rushD:0,years:"1981-84"},
+      {name:"Tim Worley",pos:["RB"],pass:0,rush:82,recv:10,passD:0,rushD:0,years:"1985-88"},
+    ],
+    "1990s": [
+      {name:"Garrison Hearst",pos:["RB"],pass:0,rush:88,recv:12,passD:0,rushD:0,years:"1990-92"},
+      {name:"Eric Zeier",pos:["QB"],pass:82,rush:5,recv:0,passD:0,rushD:0,years:"1991-94"},
+      {name:"Richard Seymour",pos:["DL"],pass:0,rush:0,recv:0,passD:55,rushD:88,years:"1997-00"},
+    ],
+    "2000s": [
+      {name:"Matthew Stafford",pos:["QB"],pass:84,rush:5,recv:0,passD:0,rushD:0,years:"2006-08"},
+      {name:"Knowshon Moreno",pos:["RB"],pass:0,rush:85,recv:15,passD:0,rushD:0,years:"2006-08"},
+      {name:"A.J. Green",pos:["WR"],pass:0,rush:2,recv:88,passD:0,rushD:0,years:"2008-10"},
+      {name:"David Pollack",pos:["DL","LB"],pass:0,rush:0,recv:0,passD:65,rushD:90,years:"2001-04"},
+    ],
+    "2010s": [
+      {name:"Todd Gurley",pos:["RB"],pass:0,rush:90,recv:15,passD:0,rushD:0,years:"2012-14"},
+      {name:"Nick Chubb",pos:["RB"],pass:0,rush:92,recv:8,passD:0,rushD:0,years:"2014-17"},
+      {name:"Roquan Smith",pos:["LB"],pass:0,rush:0,recv:0,passD:78,rushD:90,years:"2015-17"},
+      {name:"Sony Michel",pos:["RB"],pass:0,rush:85,recv:12,passD:0,rushD:0,years:"2014-17"},
+    ],
+    "2020s": [
+      {name:"Stetson Bennett",pos:["QB"],pass:84,rush:15,recv:0,passD:0,rushD:0,years:"2020-22"},
+      {name:"Brock Bowers",pos:["WR"],pass:0,rush:8,recv:92,passD:0,rushD:0,years:"2021-24"},
+      {name:"Jalen Carter",pos:["DL"],pass:0,rush:0,recv:0,passD:60,rushD:95,years:"2020-22"},
+      {name:"Nakobe Dean",pos:["LB"],pass:0,rush:0,recv:0,passD:78,rushD:90,years:"2019-21"},
+    ],
+  },
+  "Clemson": {
+    "1970s": [
+      {name:"Steve Fuller",pos:["QB"],pass:72,rush:18,recv:0,passD:0,rushD:0,years:"1975-78"},
+    ],
+    "1980s": [
+      {name:"William Perry",pos:["DL"],pass:0,rush:0,recv:0,passD:48,rushD:88,years:"1981-84"},
+      {name:"Terry Kinard",pos:["LB"],pass:0,rush:0,recv:0,passD:85,rushD:62,years:"1979-82"},
+    ],
+    "1990s": [
+      {name:"Brian Dawkins",pos:["LB"],pass:0,rush:0,recv:0,passD:85,rushD:68,years:"1992-95"},
+      {name:"Levon Kirkland",pos:["LB"],pass:0,rush:0,recv:0,passD:70,rushD:85,years:"1988-91"},
+    ],
+    "2000s": [
+      {name:"C.J. Spiller",pos:["RB"],pass:0,rush:85,recv:18,passD:0,rushD:0,years:"2006-09"},
+      {name:"Gaines Adams",pos:["DL"],pass:0,rush:0,recv:0,passD:58,rushD:85,years:"2003-06"},
+    ],
+    "2010s": [
+      {name:"Deshaun Watson",pos:["QB"],pass:92,rush:28,recv:0,passD:0,rushD:0,years:"2014-16"},
+      {name:"Travis Etienne",pos:["RB"],pass:0,rush:90,recv:18,passD:0,rushD:0,years:"2017-20"},
+      {name:"Sammy Watkins",pos:["WR"],pass:0,rush:8,recv:90,passD:0,rushD:0,years:"2011-13"},
+      {name:"DeAndre Hopkins",pos:["WR"],pass:0,rush:3,recv:85,passD:0,rushD:0,years:"2010-12"},
+      {name:"Clelin Ferrell",pos:["DL"],pass:0,rush:0,recv:0,passD:60,rushD:88,years:"2016-18"},
+    ],
+    "2020s": [
+      {name:"Will Shipley",pos:["RB"],pass:0,rush:82,recv:15,passD:0,rushD:0,years:"2021-23"},
+      {name:"Myles Murphy",pos:["DL"],pass:0,rush:0,recv:0,passD:58,rushD:85,years:"2020-22"},
+    ],
+  },
+  "Nebraska": {
+    "1970s": [
+      {name:"Johnny Rodgers",pos:["WR","RB"],pass:0,rush:30,recv:80,passD:0,rushD:0,years:"1970-72"},
+      {name:"Rich Glover",pos:["DL"],pass:0,rush:0,recv:0,passD:55,rushD:88,years:"1970-72"},
+    ],
+    "1980s": [
+      {name:"Mike Rozier",pos:["RB"],pass:0,rush:95,recv:10,passD:0,rushD:0,years:"1981-83"},
+      {name:"Turner Gill",pos:["QB"],pass:75,rush:30,recv:0,passD:0,rushD:0,years:"1980-83"},
+      {name:"Dean Steinkuhler",pos:["DL"],pass:0,rush:0,recv:0,passD:48,rushD:85,years:"1980-83"},
+    ],
+    "1990s": [
+      {name:"Tommie Frazier",pos:["QB"],pass:72,rush:38,recv:0,passD:0,rushD:0,years:"1992-95"},
+      {name:"Lawrence Phillips",pos:["RB"],pass:0,rush:90,recv:10,passD:0,rushD:0,years:"1993-95"},
+      {name:"Grant Wistrom",pos:["DL"],pass:0,rush:0,recv:0,passD:60,rushD:90,years:"1994-97"},
+      {name:"Trev Alberts",pos:["LB"],pass:0,rush:0,recv:0,passD:65,rushD:88,years:"1990-93"},
+    ],
+    "2000s": [
+      {name:"Ndamukong Suh",pos:["DL"],pass:0,rush:0,recv:0,passD:58,rushD:96,years:"2005-09"},
+      {name:"Eric Crouch",pos:["QB"],pass:68,rush:35,recv:0,passD:0,rushD:0,years:"1998-01"},
+    ],
+    "2010s": [
+      {name:"Ameer Abdullah",pos:["RB"],pass:0,rush:85,recv:12,passD:0,rushD:0,years:"2011-14"},
+      {name:"Lavonte David",pos:["LB"],pass:0,rush:0,recv:0,passD:72,rushD:85,years:"2008-11"},
+    ],
+    "2020s": [
+      {name:"Rahmir Johnson",pos:["RB"],pass:0,rush:72,recv:15,passD:0,rushD:0,years:"2020-23"},
+    ],
+  },
+  "Miami (FL)": {
+    "1980s": [
+      {name:"Vinny Testaverde",pos:["QB"],pass:85,rush:8,recv:0,passD:0,rushD:0,years:"1982-86"},
+      {name:"Michael Irvin",pos:["WR"],pass:0,rush:3,recv:88,passD:0,rushD:0,years:"1985-87"},
+      {name:"Jerome Brown",pos:["DL"],pass:0,rush:0,recv:0,passD:55,rushD:90,years:"1983-86"},
+      {name:"Bennie Blades",pos:["LB"],pass:0,rush:0,recv:0,passD:85,rushD:62,years:"1984-87"},
+    ],
+    "1990s": [
+      {name:"Gino Torretta",pos:["QB"],pass:80,rush:5,recv:0,passD:0,rushD:0,years:"1989-92"},
+      {name:"Warren Sapp",pos:["DL"],pass:0,rush:0,recv:0,passD:55,rushD:92,years:"1991-94"},
+      {name:"Ray Lewis",pos:["LB"],pass:0,rush:0,recv:0,passD:78,rushD:95,years:"1993-95"},
+      {name:"Ed Reed",pos:["LB"],pass:0,rush:0,recv:0,passD:95,rushD:58,years:"1998-01"},
+    ],
+    "2000s": [
+      {name:"Willis McGahee",pos:["RB"],pass:0,rush:88,recv:12,passD:0,rushD:0,years:"2000-02"},
+      {name:"Andre Johnson",pos:["WR"],pass:0,rush:3,recv:85,passD:0,rushD:0,years:"2000-02"},
+      {name:"Sean Taylor",pos:["LB"],pass:0,rush:0,recv:0,passD:90,rushD:65,years:"2001-03"},
+      {name:"Jonathan Vilma",pos:["LB"],pass:0,rush:0,recv:0,passD:72,rushD:85,years:"2000-03"},
+    ],
+    "2010s": [
+      {name:"Brad Kaaya",pos:["QB"],pass:78,rush:5,recv:0,passD:0,rushD:0,years:"2014-16"},
+      {name:"Gregory Rousseau",pos:["DL"],pass:0,rush:0,recv:0,passD:58,rushD:82,years:"2018-20"},
+    ],
+    "2020s": [
+      {name:"Tyler Van Dyke",pos:["QB"],pass:80,rush:8,recv:0,passD:0,rushD:0,years:"2020-23"},
+    ],
+    "1970s": [
+      {name:"Ottis Anderson",pos:["RB"],pass:0,rush:82,recv:12,passD:0,rushD:0,years:"1975-78"},
+    ],
+  },
+  "Penn State": {
+    "1970s": [
+      {name:"John Cappelletti",pos:["RB"],pass:0,rush:88,recv:8,passD:0,rushD:0,years:"1971-73"},
+      {name:"Chuck Fusina",pos:["QB"],pass:75,rush:10,recv:0,passD:0,rushD:0,years:"1975-78"},
+    ],
+    "1980s": [
+      {name:"D.J. Dozier",pos:["RB"],pass:0,rush:82,recv:12,passD:0,rushD:0,years:"1983-86"},
+      {name:"Shane Conlan",pos:["LB"],pass:0,rush:0,recv:0,passD:75,rushD:88,years:"1983-86"},
+    ],
+    "1990s": [
+      {name:"Kerry Collins",pos:["QB"],pass:82,rush:5,recv:0,passD:0,rushD:0,years:"1991-94"},
+      {name:"Ki-Jana Carter",pos:["RB"],pass:0,rush:90,recv:12,passD:0,rushD:0,years:"1992-94"},
+      {name:"LaVar Arrington",pos:["LB"],pass:0,rush:0,recv:0,passD:72,rushD:92,years:"1997-99"},
+    ],
+    "2000s": [
+      {name:"Michael Robinson",pos:["QB","RB"],pass:65,rush:30,recv:0,passD:0,rushD:0,years:"2002-05"},
+      {name:"Paul Posluszny",pos:["LB"],pass:0,rush:0,recv:0,passD:75,rushD:90,years:"2003-06"},
+      {name:"Tamba Hali",pos:["DL"],pass:0,rush:0,recv:0,passD:60,rushD:88,years:"2002-05"},
+    ],
+    "2010s": [
+      {name:"Saquon Barkley",pos:["RB"],pass:0,rush:92,recv:22,passD:0,rushD:0,years:"2015-17"},
+      {name:"Trace McSorley",pos:["QB"],pass:80,rush:22,recv:0,passD:0,rushD:0,years:"2016-18"},
+      {name:"Micah Parsons",pos:["LB"],pass:0,rush:0,recv:0,passD:72,rushD:92,years:"2018-19"},
+    ],
+    "2020s": [
+      {name:"Sean Clifford",pos:["QB"],pass:78,rush:15,recv:0,passD:0,rushD:0,years:"2019-22"},
+      {name:"Nicholas Singleton",pos:["RB"],pass:0,rush:82,recv:12,passD:0,rushD:0,years:"2022-24"},
+      {name:"Abdul Carter",pos:["LB","DL"],pass:0,rush:0,recv:0,passD:68,rushD:90,years:"2022-24"},
+    ],
+  },
+  "Florida State": {
+    "1980s": [
+      {name:"Deion Sanders",pos:["LB","WR"],pass:0,rush:8,recv:20,passD:95,rushD:45,years:"1985-88"},
+      {name:"Sammie Smith",pos:["RB"],pass:0,rush:82,recv:10,passD:0,rushD:0,years:"1986-88"},
+    ],
+    "1990s": [
+      {name:"Charlie Ward",pos:["QB"],pass:85,rush:18,recv:0,passD:0,rushD:0,years:"1990-93"},
+      {name:"Warrick Dunn",pos:["RB"],pass:0,rush:85,recv:18,passD:0,rushD:0,years:"1993-96"},
+      {name:"Peter Warrick",pos:["WR"],pass:0,rush:10,recv:88,passD:0,rushD:0,years:"1995-99"},
+      {name:"Derrick Brooks",pos:["LB"],pass:0,rush:0,recv:0,passD:80,rushD:90,years:"1991-94"},
+    ],
+    "2000s": [
+      {name:"Chris Weinke",pos:["QB"],pass:85,rush:3,recv:0,passD:0,rushD:0,years:"1997-00"},
+      {name:"Ernie Sims",pos:["LB"],pass:0,rush:0,recv:0,passD:72,rushD:82,years:"2003-05"},
+    ],
+    "2010s": [
+      {name:"Jameis Winston",pos:["QB"],pass:90,rush:10,recv:0,passD:0,rushD:0,years:"2012-14"},
+      {name:"Dalvin Cook",pos:["RB"],pass:0,rush:90,recv:15,passD:0,rushD:0,years:"2014-16"},
+      {name:"Rashad Greene",pos:["WR"],pass:0,rush:5,recv:82,passD:0,rushD:0,years:"2011-14"},
+      {name:"Jalen Ramsey",pos:["LB"],pass:0,rush:0,recv:0,passD:90,rushD:60,years:"2013-15"},
+    ],
+    "2020s": [
+      {name:"Jordan Travis",pos:["QB"],pass:85,rush:22,recv:0,passD:0,rushD:0,years:"2020-23"},
+      {name:"Jared Verse",pos:["DL"],pass:0,rush:0,recv:0,passD:60,rushD:88,years:"2022-23"},
+    ],
+    "1970s": [
+      {name:"Ron Simmons",pos:["DL"],pass:0,rush:0,recv:0,passD:50,rushD:82,years:"1977-80"},
+    ],
+  },
+  "Auburn": {
+    "1970s": [
+      {name:"James Brooks",pos:["RB"],pass:0,rush:82,recv:15,passD:0,rushD:0,years:"1977-80"},
+    ],
+    "1980s": [
+      {name:"Bo Jackson",pos:["RB"],pass:0,rush:95,recv:5,passD:0,rushD:0,years:"1982-85"},
+      {name:"Tracy Rocker",pos:["DL"],pass:0,rush:0,recv:0,passD:52,rushD:90,years:"1985-88"},
+    ],
+    "1990s": [
+      {name:"Takeo Spikes",pos:["LB"],pass:0,rush:0,recv:0,passD:72,rushD:88,years:"1994-97"},
+      {name:"Lawyer Milloy",pos:["LB"],pass:0,rush:0,recv:0,passD:82,rushD:65,years:"1993-95"},
+    ],
+    "2000s": [
+      {name:"Cadillac Williams",pos:["RB"],pass:0,rush:88,recv:12,passD:0,rushD:0,years:"2001-04"},
+      {name:"Ronnie Brown",pos:["RB"],pass:0,rush:85,recv:15,passD:0,rushD:0,years:"2001-04"},
+      {name:"Carlos Rogers",pos:["LB"],pass:0,rush:0,recv:0,passD:82,rushD:60,years:"2001-04"},
+    ],
+    "2010s": [
+      {name:"Cam Newton",pos:["QB"],pass:88,rush:40,recv:0,passD:0,rushD:0,years:"2010"},
+      {name:"Tre Mason",pos:["RB"],pass:0,rush:85,recv:10,passD:0,rushD:0,years:"2011-13"},
+      {name:"Nick Fairley",pos:["DL"],pass:0,rush:0,recv:0,passD:55,rushD:92,years:"2009-10"},
+    ],
+    "2020s": [
+      {name:"Tank Bigsby",pos:["RB"],pass:0,rush:82,recv:12,passD:0,rushD:0,years:"2020-22"},
+    ],
+  },
+  "Tennessee": {
+    "1970s": [
+      {name:"Condredge Holloway",pos:["QB"],pass:72,rush:25,recv:0,passD:0,rushD:0,years:"1972-74"},
+    ],
+    "1980s": [
+      {name:"Reggie White",pos:["DL"],pass:0,rush:0,recv:0,passD:60,rushD:96,years:"1980-83"},
+    ],
+    "1990s": [
+      {name:"Peyton Manning",pos:["QB"],pass:92,rush:5,recv:0,passD:0,rushD:0,years:"1994-97"},
+      {name:"Jamal Lewis",pos:["RB"],pass:0,rush:88,recv:8,passD:0,rushD:0,years:"1997-99"},
+      {name:"Al Wilson",pos:["LB"],pass:0,rush:0,recv:0,passD:75,rushD:88,years:"1995-98"},
+    ],
+    "2000s": [
+      {name:"Jason Witten",pos:["WR"],pass:0,rush:2,recv:78,passD:0,rushD:0,years:"2000-02"},
+      {name:"Eric Berry",pos:["LB"],pass:0,rush:0,recv:0,passD:88,rushD:62,years:"2007-09"},
+    ],
+    "2010s": [
+      {name:"Joshua Dobbs",pos:["QB"],pass:78,rush:22,recv:0,passD:0,rushD:0,years:"2013-16"},
+      {name:"Derek Barnett",pos:["DL"],pass:0,rush:0,recv:0,passD:58,rushD:88,years:"2014-16"},
+    ],
+    "2020s": [
+      {name:"Hendon Hooker",pos:["QB"],pass:90,rush:20,recv:0,passD:0,rushD:0,years:"2021-22"},
+      {name:"Jalin Hyatt",pos:["WR"],pass:0,rush:3,recv:85,passD:0,rushD:0,years:"2020-22"},
+    ],
+  },
+  "Oregon": {
+    "1990s": [
+      {name:"Joey Harrington",pos:["QB"],pass:82,rush:10,recv:0,passD:0,rushD:0,years:"1998-01"},
+    ],
+    "2000s": [
+      {name:"Jonathan Stewart",pos:["RB"],pass:0,rush:85,recv:12,passD:0,rushD:0,years:"2005-07"},
+      {name:"Haloti Ngata",pos:["DL"],pass:0,rush:0,recv:0,passD:52,rushD:88,years:"2002-05"},
+    ],
+    "2010s": [
+      {name:"Marcus Mariota",pos:["QB"],pass:90,rush:32,recv:0,passD:0,rushD:0,years:"2012-14"},
+      {name:"De'Anthony Thomas",pos:["RB","WR"],pass:0,rush:55,recv:45,passD:0,rushD:0,years:"2011-13"},
+      {name:"Arik Armstead",pos:["DL"],pass:0,rush:0,recv:0,passD:55,rushD:82,years:"2012-14"},
+      {name:"Kenjon Barner",pos:["RB"],pass:0,rush:85,recv:15,passD:0,rushD:0,years:"2009-12"},
+    ],
+    "2020s": [
+      {name:"Bo Nix",pos:["QB"],pass:88,rush:22,recv:0,passD:0,rushD:0,years:"2022-23"},
+      {name:"Bucky Irving",pos:["RB"],pass:0,rush:82,recv:15,passD:0,rushD:0,years:"2021-23"},
+      {name:"Troy Franklin",pos:["WR"],pass:0,rush:5,recv:82,passD:0,rushD:0,years:"2021-23"},
+    ],
+    "1970s": [
+      {name:"Dan Fouts",pos:["QB"],pass:78,rush:5,recv:0,passD:0,rushD:0,years:"1970-72"},
+    ],
+    "1980s": [
+      {name:"Bill Musgrave",pos:["QB"],pass:72,rush:8,recv:0,passD:0,rushD:0,years:"1987-90"},
+    ],
+  },
+  "Wisconsin": {
+    "1990s": [
+      {name:"Ron Dayne",pos:["RB"],pass:0,rush:95,recv:5,passD:0,rushD:0,years:"1996-99"},
+    ],
+    "2000s": [
+      {name:"Russell Wilson",pos:["QB"],pass:85,rush:18,recv:0,passD:0,rushD:0,years:"2011"},
+      {name:"J.J. Watt",pos:["DL"],pass:0,rush:0,recv:0,passD:58,rushD:90,years:"2008-10"},
+    ],
+    "2010s": [
+      {name:"Melvin Gordon III",pos:["RB"],pass:0,rush:93,recv:10,passD:0,rushD:0,years:"2011-14"},
+      {name:"Jonathan Taylor",pos:["RB"],pass:0,rush:95,recv:10,passD:0,rushD:0,years:"2017-19"},
+      {name:"T.J. Watt",pos:["DL","LB"],pass:0,rush:0,recv:0,passD:62,rushD:85,years:"2013-16"},
+    ],
+    "2020s": [
+      {name:"Braelon Allen",pos:["RB"],pass:0,rush:82,recv:8,passD:0,rushD:0,years:"2021-23"},
+    ],
+    "1970s": [
+      {name:"Billy Marek",pos:["RB"],pass:0,rush:78,recv:8,passD:0,rushD:0,years:"1972-74"},
+    ],
+    "1980s": [
+      {name:"Brent Moss",pos:["RB"],pass:0,rush:80,recv:8,passD:0,rushD:0,years:"1990-93"},
+    ],
+  },
+  "Texas A&M": {
+    "1970s": [
+      {name:"Robert Jackson",pos:["LB"],pass:0,rush:0,recv:0,passD:72,rushD:80,years:"1974-76"},
+    ],
+    "1980s": [
+      {name:"Kevin Murray",pos:["QB"],pass:78,rush:12,recv:0,passD:0,rushD:0,years:"1983-86"},
+    ],
+    "1990s": [
+      {name:"Dat Nguyen",pos:["LB"],pass:0,rush:0,recv:0,passD:72,rushD:90,years:"1995-98"},
+    ],
+    "2000s": [
+      {name:"Von Miller",pos:["LB","DL"],pass:0,rush:0,recv:0,passD:65,rushD:92,years:"2007-10"},
+    ],
+    "2010s": [
+      {name:"Johnny Manziel",pos:["QB"],pass:88,rush:38,recv:0,passD:0,rushD:0,years:"2012-13"},
+      {name:"Mike Evans",pos:["WR"],pass:0,rush:3,recv:90,passD:0,rushD:0,years:"2012-13"},
+      {name:"Myles Garrett",pos:["DL"],pass:0,rush:0,recv:0,passD:62,rushD:95,years:"2014-16"},
+    ],
+    "2020s": [
+      {name:"Devon Achane",pos:["RB"],pass:0,rush:85,recv:15,passD:0,rushD:0,years:"2020-22"},
+      {name:"Evan Stewart",pos:["WR"],pass:0,rush:5,recv:78,passD:0,rushD:0,years:"2022-23"},
+    ],
+  },
+  "Michigan State": {
+    "1970s": [
+      {name:"Kirk Gibson",pos:["WR"],pass:0,rush:5,recv:78,passD:0,rushD:0,years:"1975-78"},
+    ],
+    "1980s": [
+      {name:"Lorenzo White",pos:["RB"],pass:0,rush:88,recv:10,passD:0,rushD:0,years:"1984-87"},
+    ],
+    "1990s": [
+      {name:"Flozell Adams",pos:["DL"],pass:0,rush:0,recv:0,passD:45,rushD:78,years:"1994-97"},
+    ],
+    "2000s": [
+      {name:"Javon Ringer",pos:["RB"],pass:0,rush:82,recv:12,passD:0,rushD:0,years:"2005-08"},
+    ],
+    "2010s": [
+      {name:"Connor Cook",pos:["QB"],pass:80,rush:8,recv:0,passD:0,rushD:0,years:"2013-15"},
+      {name:"Le'Veon Bell",pos:["RB"],pass:0,rush:88,recv:18,passD:0,rushD:0,years:"2010-12"},
+      {name:"Shilique Calhoun",pos:["DL"],pass:0,rush:0,recv:0,passD:58,rushD:85,years:"2012-15"},
+    ],
+    "2020s": [
+      {name:"Kenneth Walker III",pos:["RB"],pass:0,rush:90,recv:8,passD:0,rushD:0,years:"2021"},
+    ],
+  },
+  "Ole Miss": {
+    "1960s": [],
+    "1970s": [
+      {name:"Archie Manning",pos:["QB"],pass:82,rush:20,recv:0,passD:0,rushD:0,years:"1968-70"},
+    ],
+    "1980s": [],
+    "1990s": [
+      {name:"Deuce McAllister",pos:["RB"],pass:0,rush:85,recv:12,passD:0,rushD:0,years:"1997-00"},
+      {name:"Patrick Willis",pos:["LB"],pass:0,rush:0,recv:0,passD:75,rushD:92,years:"2003-06"},
+    ],
+    "2000s": [
+      {name:"Eli Manning",pos:["QB"],pass:85,rush:5,recv:0,passD:0,rushD:0,years:"2000-03"},
+      {name:"Michael Oher",pos:["DL"],pass:0,rush:0,recv:0,passD:42,rushD:75,years:"2005-08"},
+    ],
+    "2010s": [
+      {name:"D.K. Metcalf",pos:["WR"],pass:0,rush:3,recv:82,passD:0,rushD:0,years:"2016-18"},
+      {name:"Laquon Treadwell",pos:["WR"],pass:0,rush:3,recv:80,passD:0,rushD:0,years:"2013-15"},
+    ],
+    "2020s": [
+      {name:"Jaxson Dart",pos:["QB"],pass:85,rush:15,recv:0,passD:0,rushD:0,years:"2022-24"},
+      {name:"Quinshon Judkins",pos:["RB"],pass:0,rush:88,recv:10,passD:0,rushD:0,years:"2022-23"},
+    ],
+  },
+  "Colorado": {
+    "1970s": [],
+    "1980s": [],
+    "1990s": [
+      {name:"Rashaan Salaam",pos:["RB"],pass:0,rush:90,recv:8,passD:0,rushD:0,years:"1992-94"},
+      {name:"Kordell Stewart",pos:["QB"],pass:75,rush:28,recv:0,passD:0,rushD:0,years:"1991-94"},
+      {name:"Michael Westbrook",pos:["WR"],pass:0,rush:5,recv:82,passD:0,rushD:0,years:"1991-94"},
+    ],
+    "2000s": [],
+    "2010s": [],
+    "2020s": [
+      {name:"Shedeur Sanders",pos:["QB"],pass:88,rush:10,recv:0,passD:0,rushD:0,years:"2023-24"},
+      {name:"Travis Hunter",pos:["WR","LB"],pass:0,rush:3,recv:88,passD:85,rushD:40,years:"2023-24"},
+    ],
+  },
+  "Pittsburgh": {
+    "1970s": [
+      {name:"Tony Dorsett",pos:["RB"],pass:0,rush:94,recv:10,passD:0,rushD:0,years:"1973-76"},
+      {name:"Hugh Green",pos:["LB","DL"],pass:0,rush:0,recv:0,passD:68,rushD:90,years:"1977-80"},
+    ],
+    "1980s": [
+      {name:"Craig Heyward",pos:["RB"],pass:0,rush:85,recv:8,passD:0,rushD:0,years:"1985-88"},
+      {name:"Bill Fralic",pos:["DL"],pass:0,rush:0,recv:0,passD:45,rushD:80,years:"1981-84"},
+    ],
+    "1990s": [
+      {name:"Larry Fitzgerald",pos:["WR"],pass:0,rush:2,recv:90,passD:0,rushD:0,years:"2001-03"},
+    ],
+    "2000s": [
+      {name:"LeSean McCoy",pos:["RB"],pass:0,rush:85,recv:18,passD:0,rushD:0,years:"2007-08"},
+      {name:"Aaron Donald",pos:["DL"],pass:0,rush:0,recv:0,passD:58,rushD:94,years:"2010-13"},
+      {name:"Darrelle Revis",pos:["LB"],pass:0,rush:0,recv:0,passD:92,rushD:55,years:"2004-06"},
+    ],
+    "2010s": [
+      {name:"James Conner",pos:["RB"],pass:0,rush:85,recv:12,passD:0,rushD:0,years:"2014-16"},
+    ],
+    "2020s": [
+      {name:"Kenny Pickett",pos:["QB"],pass:82,rush:15,recv:0,passD:0,rushD:0,years:"2017-21"},
+    ],
+  },
+  "Virginia Tech": {
+    "1990s": [
+      {name:"Michael Vick",pos:["QB"],pass:82,rush:42,recv:0,passD:0,rushD:0,years:"1999-00"},
+      {name:"Corey Moore",pos:["DL","LB"],pass:0,rush:0,recv:0,passD:62,rushD:88,years:"1997-99"},
+    ],
+    "2000s": [
+      {name:"Kevin Jones",pos:["RB"],pass:0,rush:85,recv:12,passD:0,rushD:0,years:"2001-03"},
+      {name:"DeAngelo Hall",pos:["LB"],pass:0,rush:0,recv:0,passD:88,rushD:55,years:"2001-03"},
+    ],
+    "2010s": [
+      {name:"Tremaine Edmunds",pos:["LB"],pass:0,rush:0,recv:0,passD:72,rushD:82,years:"2015-17"},
+    ],
+    "2020s": [],
+    "1970s": [],
+    "1980s": [],
+  },
+};
+
+// Game state
+let gameMode = 'classic';
+let round = 0;
+let teamSkipUsed = false;
+let decadeSkipUsed = false;
+let currentTeam = null;
+let currentDecade = null;
+let selectedPlayer = null;
+let selectedPosition = null;
+let hasSpun = false;
+let usedDecades = [];
+
+const roster = { QB: null, RB: null, WR: null, DL: null, LB: null };
+
+function setMode(mode) {
+  gameMode = mode;
+  document.getElementById('classicBtn').classList.toggle('active', mode === 'classic');
+  document.getElementById('blindBtn').classList.toggle('active', mode === 'blind');
+  const playerList = document.getElementById('playerList');
+  if (mode === 'blind') {
+    playerList.classList.add('hidden-stats');
+  } else {
+    playerList.classList.remove('hidden-stats');
+  }
+}
+
+function startGame() {
+  document.getElementById('startScreen').classList.add('hidden');
+  document.getElementById('gameScreen').classList.remove('hidden');
+  round = 0;
+  teamSkipUsed = false;
+  decadeSkipUsed = false;
+  usedDecades = [];
+  Object.keys(roster).forEach(k => roster[k] = null);
+  updateRosterUI();
+  updateStrength();
+}
+
+function getRandomTeam() {
+  return TEAMS[Math.floor(Math.random() * TEAMS.length)];
+}
+
+function getRandomDecade() {
+  const available = DECADES.filter(d => !usedDecades.includes(d));
+  if (available.length === 0) return DECADES[Math.floor(Math.random() * DECADES.length)];
+  return available[Math.floor(Math.random() * available.length)];
+}
+
+function spin() {
+  if (round >= 5) return;
+
+  const spinBtn = document.getElementById('spinBtn');
+  spinBtn.disabled = true;
+  document.getElementById('playerList').classList.add('hidden');
+
+  const slotTeam = document.getElementById('slotTeam');
+  const slotDecade = document.getElementById('slotDecade');
+
+  slotTeam.classList.add('spinning');
+  slotDecade.classList.add('spinning');
+
+  let spinCount = 0;
+  const spinInterval = setInterval(() => {
+    slotTeam.textContent = TEAMS[Math.floor(Math.random() * TEAMS.length)];
+    slotDecade.textContent = DECADES[Math.floor(Math.random() * DECADES.length)];
+    spinCount++;
+
+    if (spinCount > 20) {
+      clearInterval(spinInterval);
+
+      let team = getRandomTeam();
+      let decade = getRandomDecade();
+
+      let attempts = 0;
+      while (attempts < 50) {
+        const teamData = PLAYERS[team];
+        if (teamData && teamData[decade] && teamData[decade].length > 0) break;
+        team = getRandomTeam();
+        decade = getRandomDecade();
+        attempts++;
+      }
+
+      currentTeam = team;
+      currentDecade = decade;
+
+      slotTeam.classList.remove('spinning');
+      slotDecade.classList.remove('spinning');
+      slotTeam.textContent = team;
+      slotDecade.textContent = decade;
+
+      hasSpun = true;
+      showPlayers();
+      updateSkipButtons();
+    }
+  }, 80);
+}
+
+function showPlayers() {
+  const container = document.getElementById('playerCards');
+  const playerList = document.getElementById('playerList');
+  container.innerHTML = '';
+
+  const teamData = PLAYERS[currentTeam];
+  if (!teamData || !teamData[currentDecade] || teamData[currentDecade].length === 0) {
+    container.innerHTML = '<p style="color: var(--text-muted); text-align: center; padding: 20px;">No players available. Use a skip!</p>';
+    playerList.classList.remove('hidden');
+    return;
+  }
+
+  const players = teamData[currentDecade];
+
+  players.forEach((player, idx) => {
+    const card = document.createElement('div');
+    card.className = 'player-card';
+    card.onclick = () => selectPlayer(idx);
+
+    const positions = player.pos.join(' / ');
+    const statsHTML = gameMode === 'blind' ? '' : `
+      <div class="player-stats">
+        ${player.pass ? `Pass: <span>${player.pass}</span>` : ''}
+        ${player.rush ? `Rush: <span>${player.rush}</span>` : ''}
+        ${player.recv ? `Recv: <span>${player.recv}</span>` : ''}
+        ${player.passD ? `Pass D: <span>${player.passD}</span>` : ''}
+        ${player.rushD ? `Rush D: <span>${player.rushD}</span>` : ''}
+      </div>
+    `;
+
+    card.innerHTML = `
+      <div class="player-info">
+        <div class="player-name">${player.name}</div>
+        <div class="player-meta">${currentTeam} · ${player.years}</div>
+        ${statsHTML}
+      </div>
+      <div class="player-pos">${positions}</div>
+    `;
+
+    container.appendChild(card);
+  });
+
+  playerList.classList.remove('hidden');
+  if (gameMode === 'blind') {
+    playerList.classList.add('hidden-stats');
+  }
+}
+
+function selectPlayer(idx) {
+  const players = PLAYERS[currentTeam][currentDecade];
+  selectedPlayer = players[idx];
+
+  document.querySelectorAll('.player-card').forEach((c, i) => {
+    c.classList.toggle('selected', i === idx);
+  });
+
+  highlightValidPositions();
+}
+
+function highlightValidPositions() {
+  document.querySelectorAll('.roster-slot').forEach(slot => {
+    slot.classList.remove('highlight');
+  });
+
+  if (!selectedPlayer) return;
+
+  const validPositions = getValidPositions(selectedPlayer);
+  validPositions.forEach(pos => {
+    if (!roster[pos]) {
+      document.getElementById(`slot-${pos}`).classList.add('highlight');
+    }
+  });
+}
+
+function getValidPositions(player) {
+  const posMap = {
+    'QB': ['QB'],
+    'RB': ['RB'],
+    'WR': ['WR'],
+    'DL': ['DL'],
+    'LB': ['LB'],
+  };
+
+  const valid = [];
+  player.pos.forEach(p => {
+    if (posMap[p]) {
+      posMap[p].forEach(rp => {
+        if (!valid.includes(rp)) valid.push(rp);
+      });
+    }
+  });
+
+  return valid;
+}
+
+function selectSlot(position) {
+  if (!selectedPlayer) return;
+  if (roster[position]) return;
+
+  const validPositions = getValidPositions(selectedPlayer);
+  if (!validPositions.includes(position)) return;
+
+  roster[position] = {
+    ...selectedPlayer,
+    team: currentTeam,
+    decade: currentDecade,
+  };
+
+  usedDecades.push(currentDecade);
+  round++;
+  selectedPlayer = null;
+  hasSpun = false;
+
+  document.querySelectorAll('.player-card').forEach(c => c.classList.remove('selected'));
+  document.querySelectorAll('.roster-slot').forEach(s => s.classList.remove('highlight'));
+  document.getElementById('playerList').classList.add('hidden');
+
+  updateRosterUI();
+  updateStrength();
+
+  if (round < 5) {
+    document.getElementById('roundNum').textContent = round + 1;
+    document.getElementById('spinBtn').disabled = false;
+    document.getElementById('slotTeam').textContent = '—';
+    document.getElementById('slotDecade').textContent = '—';
+    updateSkipButtons();
+  } else {
+    document.getElementById('spinBtn').disabled = true;
+    document.getElementById('simBtn').disabled = false;
+    document.getElementById('roundNum').textContent = '5';
+  }
+}
+
+function updateRosterUI() {
+  Object.keys(roster).forEach(pos => {
+    const slot = document.getElementById(`slot-${pos}`);
+    const info = slot.querySelector('.slot-player-info');
+
+    if (roster[pos]) {
+      slot.classList.add('filled');
+      info.innerHTML = `
+        <div class="slot-player-name">${roster[pos].name}</div>
+        <div class="slot-player-detail">${roster[pos].team} · ${roster[pos].decade}</div>
+      `;
+    } else {
+      slot.classList.remove('filled');
+      const labels = { QB: 'Quarterback', RB: 'Running Back', WR: 'Wide Receiver', DL: 'Defensive Line', LB: 'Linebacker / DB' };
+      info.innerHTML = `<div class="slot-empty">${labels[pos]}</div>`;
+    }
+  });
+}
+
+function updateStrength() {
+  let pass = 0, rush = 0, recv = 0, passD = 0, rushD = 0;
+  let count = 0;
+
+  Object.values(roster).forEach(p => {
+    if (p) {
+      pass += p.pass;
+      rush += p.rush;
+      recv += p.recv;
+      passD += p.passD;
+      rushD += p.rushD;
+      count++;
+    }
+  });
+
+  const maxPossible = 500;
+  const total = pass + rush + recv + passD + rushD;
+  const rating = Math.round((total / maxPossible) * 100);
+
+  document.getElementById('strengthVal').textContent = rating;
+  document.getElementById('strengthFill').style.width = rating + '%';
+
+  document.getElementById('statPass').textContent = pass;
+  document.getElementById('statRush').textContent = rush;
+  document.getElementById('statRecv').textContent = recv;
+  document.getElementById('statPassD').textContent = passD;
+  document.getElementById('statRushD').textContent = rushD;
+}
+
+function updateSkipButtons() {
+  const teamBtn = document.getElementById('teamSkipBtn');
+  const decadeBtn = document.getElementById('decadeSkipBtn');
+
+  if (teamSkipUsed) {
+    teamBtn.disabled = true;
+    teamBtn.innerHTML = 'Skip Team <span class="used">(Used)</span>';
+  } else {
+    teamBtn.disabled = !hasSpun;
+  }
+
+  if (decadeSkipUsed) {
+    decadeBtn.disabled = true;
+    decadeBtn.innerHTML = 'Re-spin Decade <span class="used">(Used)</span>';
+  } else {
+    decadeBtn.disabled = !hasSpun;
+  }
+}
+
+function skipTeam() {
+  if (teamSkipUsed || !hasSpun) return;
+  teamSkipUsed = true;
+
+  let newTeam = getRandomTeam();
+  let attempts = 0;
+  while (attempts < 50) {
+    if (newTeam !== currentTeam) {
+      const teamData = PLAYERS[newTeam];
+      if (teamData && teamData[currentDecade] && teamData[currentDecade].length > 0) break;
+    }
+    newTeam = getRandomTeam();
+    attempts++;
+  }
+
+  currentTeam = newTeam;
+  document.getElementById('slotTeam').textContent = currentTeam;
+  showPlayers();
+  updateSkipButtons();
+}
+
+function skipDecade() {
+  if (decadeSkipUsed || !hasSpun) return;
+  decadeSkipUsed = true;
+
+  let newDecade = getRandomDecade();
+  let attempts = 0;
+  while (attempts < 50) {
+    if (newDecade !== currentDecade) {
+      const teamData = PLAYERS[currentTeam];
+      if (teamData && teamData[newDecade] && teamData[newDecade].length > 0) break;
+    }
+    newDecade = getRandomDecade();
+    attempts++;
+  }
+
+  currentDecade = newDecade;
+  document.getElementById('slotDecade').textContent = currentDecade;
+  showPlayers();
+  updateSkipButtons();
+}
+
+function simulate() {
+  document.getElementById('simBtn').disabled = true;
+  const overlay = document.getElementById('simOverlay');
+  overlay.classList.add('show');
+
+  let pass = 0, rush = 0, recv = 0, passD = 0, rushD = 0;
+  Object.values(roster).forEach(p => {
+    if (p) {
+      pass += p.pass; rush += p.rush; recv += p.recv;
+      passD += p.passD; rushD += p.rushD;
+    }
+  });
+
+  const total = pass + rush + recv + passD + rushD;
+  const categories = [pass, rush, recv, passD, rushD];
+  const minCategory = Math.min(...categories);
+  const maxCategory = Math.max(...categories);
+
+  const balanceBonus = minCategory > 0 ? (minCategory / maxCategory) * 15 : -10;
+  const adjustedTotal = total + balanceBonus;
+
+  let baseWinPct;
+  if (adjustedTotal >= 380) baseWinPct = 1.0;
+  else if (adjustedTotal >= 340) baseWinPct = 0.95 + (adjustedTotal - 340) / 800;
+  else if (adjustedTotal >= 280) baseWinPct = 0.8 + (adjustedTotal - 280) / 400;
+  else if (adjustedTotal >= 200) baseWinPct = 0.55 + (adjustedTotal - 200) / 320;
+  else baseWinPct = 0.3 + (adjustedTotal / 600);
+
+  let wins = 0;
+  let losses = 0;
+  let gameNum = 0;
+
+  const simInterval = setInterval(() => {
+    if (gameNum >= 15) {
+      clearInterval(simInterval);
+      setTimeout(() => {
+        overlay.classList.remove('show');
+        showResults(wins, losses);
+      }, 800);
+      return;
+    }
+
+    gameNum++;
+    const rand = Math.random();
+    const difficulty = gameNum > 12 ? 0.92 : gameNum > 10 ? 0.95 : 1.0;
+
+    if (rand < baseWinPct * difficulty) {
+      wins++;
+    } else {
+      losses++;
+    }
+
+    document.getElementById('simRecord').textContent = `${wins}-${losses}`;
+    const weekNames = [
+      'Week 1','Week 2','Week 3','Week 4','Week 5','Week 6',
+      'Week 7','Week 8','Week 9','Week 10','Week 11','Week 12',
+      'Conf. Championship','Semifinal','National Championship'
+    ];
+    document.getElementById('simWeek').textContent = weekNames[gameNum - 1] || `Game ${gameNum}`;
+  }, 300);
+}
+
+function showResults(wins, losses) {
+  const overlay = document.getElementById('resultsOverlay');
+  const record = `${wins}-${losses}`;
+
+  const recordEl = document.getElementById('resultRecord');
+  recordEl.textContent = record;
+  recordEl.className = 'result-record';
+
+  let message;
+  if (wins === 15) {
+    recordEl.classList.add('result-perfect');
+    message = 'Perfect Season! National Champions!';
+  } else if (wins >= 13) {
+    recordEl.classList.add('result-great');
+    message = 'Playoff Contender!';
+  } else if (wins >= 10) {
+    recordEl.classList.add('result-good');
+    message = 'Solid Bowl Season';
+  } else if (wins >= 7) {
+    recordEl.classList.add('result-good');
+    message = 'Bowl Eligible';
+  } else {
+    recordEl.classList.add('result-bad');
+    message = 'Rebuilding Year...';
+  }
+
+  document.getElementById('resultMessage').textContent = message;
+
+  const rosterDiv = document.getElementById('resultRoster');
+  rosterDiv.innerHTML = '';
+  Object.keys(roster).forEach(pos => {
+    const p = roster[pos];
+    if (p) {
+      rosterDiv.innerHTML += `
+        <div class="result-player">
+          <span class="result-player-pos">${pos}</span>
+          <span class="result-player-name">${p.name}</span>
+          <span class="result-player-team">${p.team} ${p.decade}</span>
+        </div>
+      `;
+    }
+  });
+
+  let total = 0;
+  Object.values(roster).forEach(p => {
+    if (p) total += p.pass + p.rush + p.recv + p.passD + p.rushD;
+  });
+  const rating = Math.round((total / 500) * 100);
+  document.getElementById('resultStrength').innerHTML = `Strength Rating: <span>${rating}</span>`;
+
+  overlay.classList.add('show');
+}
+
+function playAgain() {
+  document.getElementById('resultsOverlay').classList.remove('show');
+  document.getElementById('gameScreen').classList.add('hidden');
+  document.getElementById('startScreen').classList.remove('hidden');
+}
+</script>
+</body>
+</html>
