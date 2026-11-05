@@ -767,7 +767,7 @@
         </div>
         <div class="step">
           <div class="step-num">4</div>
-          <div class="step-text"><strong>Simulate</strong> a 15-game season. Your Strength Rating determines your record.</div>
+          <div class="step-text"><strong>Simulate</strong> a 15-game season. The better your roster, the better your record.</div>
         </div>
         <div class="step">
           <div class="step-num">*</div>
@@ -866,13 +866,6 @@
         </div>
 
         <div class="strength-section">
-          <div class="strength-label">
-            <span>Strength Rating</span>
-            <span class="strength-value" id="strengthVal">0</span>
-          </div>
-          <div class="strength-bar">
-            <div class="strength-fill" id="strengthFill"></div>
-          </div>
           <div class="stat-breakdown">
             <div class="stat-item">
               <div class="stat-item-label">Pass</div>
@@ -3488,8 +3481,6 @@ function updateStrength() {
   const maxPossible = MAX_STRENGTH;
   const rating = Math.min(100, Math.round((total/maxPossible)*100));
 
-  document.getElementById('strengthVal').textContent = rating;
-  document.getElementById('strengthFill').style.width = rating + '%';
   document.getElementById('statPass').textContent = pass;
   document.getElementById('statRush').textContent = rush;
   document.getElementById('statRecv').textContent = recv;
@@ -3603,10 +3594,6 @@ function showResults(wins, losses) {
     if (p) rosterDiv.innerHTML += `<div class="result-player"><span class="result-player-pos">${SLOT_BASE(slotId)}</span><span class="result-player-name">${p.name}</span><span class="result-player-team">${p.team} ${p.decade}</span></div>`;
   });
 
-  let total = 0;
-  Object.values(roster).forEach(p => { if (p) total += p.pass+p.rush+p.recv+p.passD+p.rushD+p.kick+p.coach; });
-  const rating = Math.min(100, Math.round((total/MAX_STRENGTH)*100));
-  document.getElementById('resultStrength').innerHTML = `Strength Rating: <span>${rating}</span>`;
   overlay.classList.add('show');
 }
 
