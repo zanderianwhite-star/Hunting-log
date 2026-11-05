@@ -763,7 +763,7 @@
         </div>
         <div class="step">
           <div class="step-num">3</div>
-          <div class="step-text"><strong>Repeat</strong> for 8 rounds to fill QB, RB, WR, DL, LB, S, K, and Coach.</div>
+          <div class="step-text"><strong>Repeat</strong> for 9 rounds to fill QB, RB, 2 WRs, DL, LB, S, K, and Coach.</div>
         </div>
         <div class="step">
           <div class="step-num">4</div>
@@ -792,7 +792,7 @@
     <div class="game-area">
       <!-- Left: Slot + Players -->
       <div class="slot-section">
-        <div class="round-indicator">Round <span id="roundNum">1</span> of 8</div>
+        <div class="round-indicator">Round <span id="roundNum">1</span> of <span id="roundTotal">9</span></div>
 
         <div class="slot-machine">
           <div class="slot-window">
@@ -828,19 +828,11 @@
       <div class="roster-section">
         <div class="roster-title">Your Roster</div>
 
-        <div class="roster-slot" id="slot-QB1" onclick="selectSlot('QB1')">
+        <div class="roster-slot" id="slot-QB" onclick="selectSlot('QB')">
           <div class="slot-position">QB</div>
           <div class="slot-player-info"><div class="slot-empty">Quarterback</div></div>
         </div>
-        <div class="roster-slot" id="slot-QB2" onclick="selectSlot('QB2')">
-          <div class="slot-position">QB</div>
-          <div class="slot-player-info"><div class="slot-empty">Quarterback</div></div>
-        </div>
-        <div class="roster-slot" id="slot-RB1" onclick="selectSlot('RB1')">
-          <div class="slot-position">RB</div>
-          <div class="slot-player-info"><div class="slot-empty">Running Back</div></div>
-        </div>
-        <div class="roster-slot" id="slot-RB2" onclick="selectSlot('RB2')">
+        <div class="roster-slot" id="slot-RB" onclick="selectSlot('RB')">
           <div class="slot-position">RB</div>
           <div class="slot-player-info"><div class="slot-empty">Running Back</div></div>
         </div>
@@ -852,27 +844,15 @@
           <div class="slot-position">WR</div>
           <div class="slot-player-info"><div class="slot-empty">Wide Receiver / TE</div></div>
         </div>
-        <div class="roster-slot" id="slot-DL1" onclick="selectSlot('DL1')">
+        <div class="roster-slot" id="slot-DL" onclick="selectSlot('DL')">
           <div class="slot-position">DL</div>
           <div class="slot-player-info"><div class="slot-empty">Defensive Line</div></div>
         </div>
-        <div class="roster-slot" id="slot-DL2" onclick="selectSlot('DL2')">
-          <div class="slot-position">DL</div>
-          <div class="slot-player-info"><div class="slot-empty">Defensive Line</div></div>
-        </div>
-        <div class="roster-slot" id="slot-LB1" onclick="selectSlot('LB1')">
+        <div class="roster-slot" id="slot-LB" onclick="selectSlot('LB')">
           <div class="slot-position">LB</div>
           <div class="slot-player-info"><div class="slot-empty">Linebacker</div></div>
         </div>
-        <div class="roster-slot" id="slot-LB2" onclick="selectSlot('LB2')">
-          <div class="slot-position">LB</div>
-          <div class="slot-player-info"><div class="slot-empty">Linebacker</div></div>
-        </div>
-        <div class="roster-slot" id="slot-S1" onclick="selectSlot('S1')">
-          <div class="slot-position">S</div>
-          <div class="slot-player-info"><div class="slot-empty">Safety / CB</div></div>
-        </div>
-        <div class="roster-slot" id="slot-S2" onclick="selectSlot('S2')">
+        <div class="roster-slot" id="slot-S" onclick="selectSlot('S')">
           <div class="slot-position">S</div>
           <div class="slot-player-info"><div class="slot-empty">Safety / CB</div></div>
         </div>
@@ -968,11 +948,12 @@ const TEAMS = [
 
 const DECADES = ["1980s","1990s","2000s","2010s","2020s"];
 
-// Two slots for every position except Kicker and Head Coach
-const SLOTS = ['QB1','QB2','RB1','RB2','WR1','WR2','DL1','DL2','LB1','LB2','S1','S2','K','HC'];
+// Two WR slots; every other position has one
+const SLOTS = ['QB','RB','WR1','WR2','DL','LB','S','K','HC'];
 const SLOT_BASE = slot => slot.replace(/\d+$/, '');
 const TOTAL_ROUNDS = SLOTS.length;
 const POSITIONS = SLOTS; // alias kept for compatibility
+const MAX_STRENGTH = 1150; // roster total that counts as a 100 rating
 
 const PLAYERS = {
 "Alabama": {
@@ -3329,6 +3310,7 @@ function startGame() {
   document.getElementById('spinBtn').disabled = false;
   document.getElementById('simBtn').disabled = true;
   document.getElementById('roundNum').textContent = '1';
+  document.getElementById('roundTotal').textContent = TOTAL_ROUNDS;
   document.getElementById('slotTeam').textContent = '—';
   document.getElementById('slotDecade').textContent = '—';
   document.getElementById('playerList').classList.add('hidden');
@@ -3503,7 +3485,7 @@ function updateStrength() {
     if (p) { pass+=p.pass; rush+=p.rush; recv+=p.recv; passD+=p.passD; rushD+=p.rushD; kick+=p.kick; coach+=p.coach; }
   });
   const total = pass+rush+recv+passD+rushD+kick+coach;
-  const maxPossible = 1300;
+  const maxPossible = MAX_STRENGTH;
   const rating = Math.min(100, Math.round((total/maxPossible)*100));
 
   document.getElementById('strengthVal').textContent = rating;
@@ -3570,21 +3552,13 @@ function simulate() {
   });
 
   const total = pass+rush+recv+passD+rushD+kick+coach;
-  const categories = [pass+rush+recv, passD+rushD, kick, coach];
-  const minCat = Math.min(...categories.filter(c => c > 0));
-  const maxCat = Math.max(...categories);
-  const balanceBonus = minCat > 0 ? (minCat/maxCat) * 20 : -15;
+  const rating = Math.min(100, (total / MAX_STRENGTH) * 100);
 
-  const coachBoost = coach * 0.15;
-  const kickBoost = kick * 0.1;
-  const adjustedTotal = total + balanceBonus + coachBoost + kickBoost;
-
-  let baseWinPct;
-  if (adjustedTotal >= 1080) baseWinPct = 1.0;
-  else if (adjustedTotal >= 950) baseWinPct = 0.93 + (adjustedTotal-950)/1800;
-  else if (adjustedTotal >= 780) baseWinPct = 0.78 + (adjustedTotal-780)/1130;
-  else if (adjustedTotal >= 600) baseWinPct = 0.55 + (adjustedTotal-600)/785;
-  else baseWinPct = 0.25 + (adjustedTotal/1800);
+  // Win chance per regular-season game. Even a 100-rated team tops out at 94%,
+  // and a great coach or kicker adds only a little.
+  let baseWinPct = 0.30 + (rating - 50) * 0.0135;
+  baseWinPct += Math.max(0, coach - 75) * 0.001 + Math.max(0, kick - 75) * 0.0005;
+  baseWinPct = Math.max(0.15, Math.min(0.94, baseWinPct));
 
   let wins=0, losses=0, gameNum=0;
 
@@ -3595,9 +3569,11 @@ function simulate() {
       return;
     }
     gameNum++;
-    const rand = Math.random();
-    const difficulty = gameNum > 13 ? 0.90 : gameNum > 12 ? 0.93 : gameNum > 10 ? 0.96 : 1.0;
-    if (rand < baseWinPct * difficulty) wins++; else losses++;
+    // Playoff games get harder, and every opponent varies a little.
+    const difficulty = gameNum === 15 ? 0.90 : gameNum === 14 ? 0.92 : gameNum === 13 ? 0.95 : 1.0;
+    const opponent = 0.97 + Math.random() * 0.06;
+    const winPct = Math.min(0.96, baseWinPct * difficulty * opponent);
+    if (Math.random() < winPct) wins++; else losses++;
 
     document.getElementById('simRecord').textContent = `${wins}-${losses}`;
     const weekNames = ['Week 1','Week 2','Week 3','Week 4','Week 5','Week 6','Week 7','Week 8','Week 9','Week 10','Week 11','Week 12','Conf. Championship','Semifinal','National Championship'];
@@ -3629,7 +3605,7 @@ function showResults(wins, losses) {
 
   let total = 0;
   Object.values(roster).forEach(p => { if (p) total += p.pass+p.rush+p.recv+p.passD+p.rushD+p.kick+p.coach; });
-  const rating = Math.min(100, Math.round((total/1300)*100));
+  const rating = Math.min(100, Math.round((total/MAX_STRENGTH)*100));
   document.getElementById('resultStrength').innerHTML = `Strength Rating: <span>${rating}</span>`;
   overlay.classList.add('show');
 }
