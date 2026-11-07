@@ -56,20 +56,24 @@
     .bg-pattern { display: none; }
 
     /* the wooden table everything sits on: horizontal planks with grain */
+    :root {
+      --wood-bg:
+        repeating-linear-gradient(180deg, transparent 0 116px, var(--wood-seam) 116px 118px, rgba(255, 220, 180, 0.08) 118px 119px),
+        repeating-linear-gradient(179deg, rgba(255, 220, 180, 0.06) 0 3px, transparent 3px 12px, rgba(0, 0, 0, 0.08) 12px 14px, transparent 14px 25px),
+        repeating-linear-gradient(181deg, rgba(0, 0, 0, 0.07) 0 1px, transparent 1px 7px),
+        linear-gradient(180deg, var(--wood-1), var(--wood-2));
+    }
+
     .container {
       max-width: 1160px;
-      margin: 24px auto;
-      padding: 8px clamp(12px, 3vw, 32px) 32px;
+      margin: 0 auto 24px;
+      padding: 0 clamp(12px, 3vw, 32px) 32px;
+      border-radius: 0 0 18px 18px !important;
       position: relative;
       z-index: 1;
       border-radius: 18px;
       background-color: var(--wood-1);
-      background-image:
-        repeating-linear-gradient(180deg, transparent 0 116px, var(--wood-seam) 116px 118px, rgba(255, 220, 180, 0.08) 118px 119px),
-        repeating-linear-gradient(179deg, rgba(255, 220, 180, 0.06) 0 3px, transparent 3px 12px, rgba(0, 0, 0, 0.08) 12px 14px, transparent 14px 25px),
-        repeating-linear-gradient(181deg, rgba(0, 0, 0, 0.07) 0 1px, transparent 1px 7px),
-        radial-gradient(ellipse 80% 60% at 50% 0%, rgba(255, 200, 140, 0.18), transparent 70%),
-        linear-gradient(180deg, var(--wood-1), var(--wood-2));
+      background-image: var(--wood-bg);
       box-shadow: 0 2px 0 #3d2212, 0 24px 50px rgba(59, 34, 18, 0.35), inset 0 0 60px rgba(0, 0, 0, 0.35);
     }
 
@@ -80,7 +84,23 @@
     }
 
     /* ---------- Pennant wordmark ---------- */
-    header { display: flex; flex-direction: column; align-items: center; padding-block: 26px 8px; }
+    /* plank band runs the full width of the screen at the top */
+    header {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      align-self: stretch;
+      margin-left: calc(50% - 50vw);
+      margin-right: calc(50% - 50vw);
+      padding-block: 22px 18px;
+      padding-left: max(16px, env(safe-area-inset-left, 0px));
+      padding-right: max(16px, env(safe-area-inset-right, 0px));
+      background-color: var(--wood-1);
+      background-image: radial-gradient(ellipse 60% 90% at 50% 0%, rgba(255, 200, 140, 0.2), transparent 70%), var(--wood-bg);
+      border-bottom: 4px solid #3d2212;
+      box-shadow: 0 8px 16px rgba(30, 15, 6, 0.35);
+      margin-bottom: 18px;
+    }
 
     /* patch badge: orange disc, cream + brown rings, pennant banner with script + block word */
     .logo {
@@ -380,11 +400,9 @@
     .card-pos {
       font-family: var(--font-label);
       font-weight: 800;
-      font-size: 0.95rem;
+      font-size: 1.7rem;
       letter-spacing: 1px;
       line-height: 1;
-      margin-top: 4px;
-      text-align: center;
     }
     .card-ovr-wrap { display: flex; flex-direction: column; align-items: center; }
 
@@ -571,7 +589,7 @@
     .play-again-btn { padding: 13px 40px; font-size: 1.1rem; }
 
     /* ---------- Start screen ---------- */
-    .start-screen { display: flex; flex-direction: column; align-items: center; text-align: center; padding-block: 44px 20px; }
+    .start-screen { display: flex; flex-direction: column; align-items: center; text-align: center; padding-block: 0 20px; }
     .start-screen .logo { --b: min(440px, 82vw); }
     .start-desc { max-width: 34rem; margin: 22px auto 0; color: var(--cream-dim); line-height: 1.65; font-size: 1.02rem; text-wrap: pretty; }
     .start-btn { display: inline-block; margin-top: 28px; padding: 16px 64px; font-size: 1.5rem; }
@@ -638,8 +656,10 @@
   <!-- Start Screen -->
   <div class="container" id="startScreen">
     <div class="start-screen">
-      <div class="logo" role="img" aria-label="Perfect 15-0"><div class="badge-disc"></div><div class="badge-banner"><span class="badge-script">Perfect</span><span class="badge-block">15-0</span></div><div class="badge-pole"></div></div>
+      <header>
+        <div class="logo" role="img" aria-label="Perfect 15-0"><div class="badge-disc"></div><div class="badge-banner"><span class="badge-script">Perfect</span><span class="badge-block">15-0</span></div><div class="badge-pole"></div></div>
       <div class="subtitle">College Football · Homecoming</div>
+      </header>
       <p class="start-desc">
         Build the ultimate all-time college football roster. Spin the slot machine, get a random program and decade, and draft one legend per round. Fill every role — from quarterback to head coach. Can your squad run the table?
       </p>
@@ -3343,7 +3363,7 @@ function showPlayers() {
 
     card.innerHTML = `
       <div class="card-top">
-        <div class="card-ovr-wrap"><div class="card-ovr">${ovr}</div><div class="card-pos">${player.pos.join('/')}</div></div>
+        <div class="card-pos">${player.pos.join('/')}</div>
         <div><div class="card-school">${esc(currentTeam)}</div><div class="card-years">${esc(player.years)}</div></div>
       </div>
       <div class="card-name">
@@ -3365,7 +3385,7 @@ function updateRosterUI() {
     const p = roster[slotId];
     if (p) {
       slot.classList.add('filled');
-      info.innerHTML = `<div class="slot-player-text"><div class="slot-player-name">${esc(p.name)}</div><div class="slot-player-detail">${esc(p.team)} · ${p.decade}</div></div><div class="slot-ovr">${OVR(p)}</div>`;
+      info.innerHTML = `<div class="slot-player-text"><div class="slot-player-name">${esc(p.name)}</div><div class="slot-player-detail">${esc(p.team)} · ${p.decade}</div></div>`;
     } else {
       slot.classList.remove('filled');
       info.innerHTML = `<div class="slot-empty">${labels[SLOT_BASE(slotId)]}</div>`;
