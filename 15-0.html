@@ -2,44 +2,60 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>15-0 — College Football All-Time Roster Builder</title>
+  <meta name="claude:viewport-fit-sides" content="cover">
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Graduate&family=Barlow+Condensed:wght@500;600;700;800&family=Barlow:wght@400;500;600&display=swap');
+
+    /* Night game: mowed turf ground, amber-bulb scoreboard panels, chalkboard depth chart.
+       Display = varsity block (Graduate), labels/scores = Barlow Condensed, body = Barlow. */
+    :root {
+      --turf-1: #1d4a29;
+      --turf-2: #225532;
+      --turf-deep: #133520;
+      --chalk: #f3f0e6;
+      --chalk-dim: rgba(243, 240, 230, 0.74);
+      --chalk-faint: rgba(243, 240, 230, 0.38);
+      --chalk-line: rgba(243, 240, 230, 0.16);
+      --board: #111410;
+      --board-2: #1a1e18;
+      --board-edge: #2f342b;
+      --slate: #1b2a22;
+      --bulb: #ffb627;
+      --bulb-glow: rgba(255, 182, 39, 0.45);
+      --jersey: #a3162b;
+      --jersey-deep: #6f0f1d;
+      --brass: #d6a53a;
+      --brass-deep: #9c7420;
+      --flag: #f4d21f;
+      --win: #7fd890;
+      --loss: #ff6b5e;
+      --font-varsity: 'Graduate', 'Rockwell', 'Courier New', serif;
+      --font-board: 'Barlow Condensed', 'Arial Narrow', 'Helvetica Neue', sans-serif;
+      --font-body: 'Barlow', 'Helvetica Neue', Arial, sans-serif;
+      color-scheme: dark;
+    }
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
-    :root {
-      --bg-primary: #0a0a0f;
-      --bg-secondary: #12121a;
-      --bg-card: #1a1a2e;
-      --bg-card-hover: #222240;
-      --accent: #c8102e;
-      --accent-glow: rgba(200, 16, 46, 0.4);
-      --gold: #d4af37;
-      --gold-glow: rgba(212, 175, 55, 0.3);
-      --text-primary: #ffffff;
-      --text-secondary: #a0a0b8;
-      --text-muted: #606078;
-      --border: #2a2a3e;
-      --success: #22c55e;
-      --danger: #ef4444;
-    }
-
     body {
-      font-family: 'Inter', sans-serif;
-      background: var(--bg-primary);
-      color: var(--text-primary);
+      font-family: var(--font-body);
+      color: var(--chalk);
+      background-color: var(--turf-1);
+      background-image: repeating-linear-gradient(180deg, var(--turf-1) 0 96px, var(--turf-2) 96px 192px);
+      background-attachment: fixed;
       min-height: 100vh;
       overflow-x: hidden;
     }
 
+    /* stadium lights from above + dark edges */
     .bg-pattern {
       position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
+      inset: 0;
       background:
-        radial-gradient(ellipse at 20% 50%, rgba(200, 16, 46, 0.06) 0%, transparent 50%),
-        radial-gradient(ellipse at 80% 20%, rgba(212, 175, 55, 0.04) 0%, transparent 50%);
+        radial-gradient(ellipse 70% 45% at 50% -8%, rgba(255, 248, 215, 0.22), transparent 70%),
+        radial-gradient(ellipse 120% 90% at 50% 40%, transparent 55%, rgba(0, 0, 0, 0.55) 100%);
       pointer-events: none;
       z-index: 0;
     }
@@ -47,696 +63,648 @@
     .container {
       max-width: 1100px;
       margin: 0 auto;
-      padding: 0 20px;
+      padding-left: max(16px, env(safe-area-inset-left, 0px));
+      padding-right: max(16px, env(safe-area-inset-right, 0px));
       position: relative;
       z-index: 1;
     }
 
-    header {
-      text-align: center;
-      padding: 30px 0 15px;
+    button { font: inherit; }
+    button:focus-visible, .roster-slot:focus-visible, .player-card:focus-visible {
+      outline: 3px solid var(--bulb);
+      outline-offset: 2px;
     }
 
+    /* ---------- Wordmark ---------- */
+    header { text-align: center; padding-block: 28px 10px; }
+
     .logo {
-      font-family: 'Oswald', sans-serif;
-      font-size: 5rem;
-      font-weight: 700;
-      letter-spacing: -2px;
-      background: linear-gradient(135deg, var(--text-primary) 0%, var(--gold) 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+      font-family: var(--font-varsity);
+      font-size: clamp(3.4rem, 9vw, 5.2rem);
       line-height: 1;
+      color: var(--chalk);
+      letter-spacing: 2px;
+      text-shadow: 3px 3px 0 var(--jersey), 6px 6px 0 var(--board);
     }
 
     .subtitle {
-      font-family: 'Oswald', sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      font-family: var(--font-board);
+      font-weight: 700;
       font-size: 1rem;
       letter-spacing: 6px;
       text-transform: uppercase;
-      color: var(--text-secondary);
-      margin-top: 4px;
+      color: var(--chalk-dim);
+      margin-top: 12px;
+    }
+    .subtitle::before, .subtitle::after {
+      content: '';
+      width: 48px;
+      height: 3px;
+      background: var(--chalk-faint);
     }
 
+    /* ---------- Classic / Blind toggle ---------- */
     .mode-toggle {
       display: flex;
       justify-content: center;
-      gap: 8px;
-      margin: 15px 0;
+      margin: 16px auto;
+      width: fit-content;
+      padding: 4px;
+      gap: 4px;
+      background: var(--board);
+      border: 2px solid var(--board-edge);
+      border-radius: 999px;
     }
 
     .mode-btn {
-      font-family: 'Oswald', sans-serif;
-      padding: 8px 24px;
-      border: 1px solid var(--border);
-      background: var(--bg-secondary);
-      color: var(--text-secondary);
-      cursor: pointer;
-      font-size: 0.85rem;
+      font-family: var(--font-board);
+      font-weight: 700;
+      font-size: 0.9rem;
       letter-spacing: 2px;
       text-transform: uppercase;
-      transition: all 0.2s;
-      border-radius: 4px;
+      padding: 7px 22px;
+      border: none;
+      border-radius: 999px;
+      background: transparent;
+      color: var(--chalk-dim);
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
     }
+    .mode-btn.active { background: var(--chalk); color: var(--board); }
+    .mode-btn:hover:not(.active) { color: var(--chalk); }
 
-    .mode-btn.active {
-      background: var(--accent);
-      color: white;
-      border-color: var(--accent);
-    }
-
-    .mode-btn:hover:not(.active) {
-      border-color: var(--text-muted);
-      color: var(--text-primary);
-    }
-
+    /* ---------- Layout ---------- */
     .game-area {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
       gap: 24px;
-      margin-top: 15px;
+      margin-top: 12px;
+      align-items: start;
     }
 
     @media (max-width: 768px) {
-      .game-area { grid-template-columns: 1fr; }
-      .logo { font-size: 3.5rem; }
+      .game-area { grid-template-columns: minmax(0, 1fr); }
     }
 
+    /* ---------- Scoreboard (spinner) ---------- */
     .slot-section {
-      background: var(--bg-secondary);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 24px;
+      background: var(--board);
+      border: 4px solid var(--board-edge);
+      border-radius: 6px;
+      padding: 20px;
+      box-shadow: 0 14px 40px rgba(0, 0, 0, 0.45), inset 0 0 0 2px #000;
     }
 
     .round-indicator {
       text-align: center;
-      font-family: 'Oswald', sans-serif;
-      font-size: 0.85rem;
-      letter-spacing: 3px;
-      color: var(--text-muted);
+      font-family: var(--font-board);
+      font-weight: 700;
+      font-size: 1rem;
+      letter-spacing: 4px;
       text-transform: uppercase;
-      margin-bottom: 16px;
+      color: var(--chalk-dim);
+      margin-bottom: 14px;
     }
+    .round-indicator span { color: var(--bulb); text-shadow: 0 0 10px var(--bulb-glow); }
 
-    .round-indicator span { color: var(--gold); }
-
-    .slot-machine {
-      display: flex;
+    .slot-machine, .slot-label {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
       gap: 12px;
-      justify-content: center;
-      margin-bottom: 20px;
     }
 
     .slot-window {
-      width: 160px;
-      height: 80px;
-      background: var(--bg-primary);
-      border: 2px solid var(--border);
-      border-radius: 8px;
+      height: 84px;
+      background-color: #050605;
+      background-image: radial-gradient(rgba(255, 182, 39, 0.07) 1px, transparent 1.5px);
+      background-size: 5px 5px;
+      border: 2px solid var(--board-edge);
+      border-radius: 4px;
+      box-shadow: inset 0 3px 12px rgba(0, 0, 0, 0.9);
       overflow: hidden;
-      position: relative;
       display: flex;
       align-items: center;
       justify-content: center;
-    }
-
-    .slot-window::before, .slot-window::after {
-      content: '';
-      position: absolute;
-      left: 0; right: 0;
-      height: 20px;
-      z-index: 2;
-      pointer-events: none;
-    }
-
-    .slot-window::before {
-      top: 0;
-      background: linear-gradient(to bottom, var(--bg-primary), transparent);
-    }
-
-    .slot-window::after {
-      bottom: 0;
-      background: linear-gradient(to top, var(--bg-primary), transparent);
+      padding: 0 8px;
     }
 
     .slot-content {
-      font-family: 'Oswald', sans-serif;
-      font-size: 1.1rem;
-      font-weight: 600;
+      font-family: var(--font-board);
+      font-weight: 800;
+      font-size: 1.45rem;
+      letter-spacing: 1px;
+      text-transform: uppercase;
       text-align: center;
-      color: var(--text-primary);
-      transition: transform 0.1s;
+      line-height: 1.05;
+      color: var(--bulb);
+      text-shadow: 0 0 12px var(--bulb-glow);
     }
-
-    .slot-content.spinning {
-      animation: slotSpin 0.1s linear infinite;
-    }
-
-    @keyframes slotSpin {
-      0% { transform: translateY(-10px); opacity: 0.5; }
-      50% { transform: translateY(0); opacity: 1; }
-      100% { transform: translateY(10px); opacity: 0.5; }
+    .slot-content.spinning { animation: flicker 0.1s linear infinite; }
+    @keyframes flicker {
+      0% { opacity: 0.45; transform: translateY(-6px); }
+      50% { opacity: 1; transform: translateY(0); }
+      100% { opacity: 0.45; transform: translateY(6px); }
     }
 
     .slot-label {
-      font-size: 0.7rem;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      color: var(--text-muted);
-      text-align: center;
-      margin-top: -8px;
-      margin-bottom: 16px;
-      display: flex;
-      justify-content: center;
-      gap: 148px;
-    }
-
-    .spin-btn {
-      display: block;
-      width: 100%;
-      padding: 14px;
-      font-family: 'Oswald', sans-serif;
-      font-size: 1.2rem;
+      margin: 8px 0 16px;
+      font-family: var(--font-board);
       font-weight: 600;
-      letter-spacing: 4px;
+      font-size: 0.78rem;
+      letter-spacing: 3px;
       text-transform: uppercase;
-      background: var(--accent);
-      color: white;
+      color: var(--chalk-faint);
+      text-align: center;
+    }
+
+    /* jersey button with sleeve stripes */
+    .spin-btn, .start-btn, .play-again-btn {
+      font-family: var(--font-varsity);
+      font-size: 1.35rem;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--chalk);
+      background: var(--jersey);
       border: none;
-      border-radius: 8px;
+      border-radius: 6px;
       cursor: pointer;
-      transition: all 0.2s;
-      box-shadow: 0 4px 20px var(--accent-glow);
+      box-shadow: inset 0 0 0 3px var(--jersey), inset 0 0 0 5px var(--chalk), 0 5px 0 var(--jersey-deep);
+      transition: transform 0.12s, box-shadow 0.12s;
     }
-
-    .spin-btn:hover:not(:disabled) {
-      transform: translateY(-1px);
-      box-shadow: 0 6px 30px var(--accent-glow);
+    .spin-btn { display: block; width: 100%; padding: 14px; }
+    .spin-btn:hover:not(:disabled), .start-btn:hover, .play-again-btn:hover { transform: translateY(-2px); }
+    .spin-btn:active:not(:disabled), .start-btn:active, .play-again-btn:active {
+      transform: translateY(3px);
+      box-shadow: inset 0 0 0 3px var(--jersey), inset 0 0 0 5px var(--chalk), 0 2px 0 var(--jersey-deep);
     }
-
     .spin-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
-    .skip-btns {
-      display: flex;
-      gap: 8px;
-      margin-top: 12px;
-    }
+    /* skips look like penalty flags */
+    .skip-btns { display: flex; gap: 10px; margin-top: 14px; }
 
     .skip-btn {
       flex: 1;
-      padding: 8px;
-      font-family: 'Oswald', sans-serif;
-      font-size: 0.75rem;
+      padding: 9px 6px;
+      font-family: var(--font-board);
+      font-weight: 700;
+      font-size: 0.85rem;
       letter-spacing: 2px;
       text-transform: uppercase;
       background: transparent;
-      color: var(--text-muted);
-      border: 1px solid var(--border);
-      border-radius: 6px;
+      color: var(--flag);
+      border: 2px dashed var(--flag);
+      border-radius: 4px;
       cursor: pointer;
-      transition: all 0.2s;
+      transition: background 0.2s, color 0.2s;
     }
+    .skip-btn:hover:not(:disabled) { background: var(--flag); color: var(--board); }
+    .skip-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+    .skip-btn .used { color: var(--loss); font-size: 0.72rem; }
 
-    .skip-btn:hover:not(:disabled) {
-      color: var(--text-primary);
-      border-color: var(--text-muted);
-    }
-
-    .skip-btn:disabled { opacity: 0.3; cursor: not-allowed; }
-    .skip-btn .used { color: var(--danger); font-size: 0.65rem; }
-
+    /* ---------- Player cards ---------- */
     .player-list { margin-top: 20px; }
 
     .player-list h3 {
-      font-family: 'Oswald', sans-serif;
-      font-size: 0.8rem;
+      font-family: var(--font-board);
+      font-weight: 700;
+      font-size: 0.9rem;
       letter-spacing: 3px;
       text-transform: uppercase;
-      color: var(--text-muted);
-      margin-bottom: 12px;
+      color: var(--chalk-dim);
+      margin-bottom: 10px;
     }
 
     .player-cards-scroll {
-      max-height: 420px;
+      max-height: 430px;
       overflow-y: auto;
       padding-right: 4px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
     }
-
-    .player-cards-scroll::-webkit-scrollbar { width: 4px; }
-    .player-cards-scroll::-webkit-scrollbar-track { background: var(--bg-primary); border-radius: 2px; }
-    .player-cards-scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+    .player-cards-scroll::-webkit-scrollbar { width: 6px; }
+    .player-cards-scroll::-webkit-scrollbar-track { background: var(--board); }
+    .player-cards-scroll::-webkit-scrollbar-thumb { background: var(--board-edge); border-radius: 3px; }
 
     .player-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 10px 14px;
-      margin-bottom: 6px;
-      cursor: pointer;
-      transition: all 0.2s;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      gap: 12px;
+      padding: 10px 12px;
+      background: var(--turf-deep);
+      border: 2px solid var(--chalk-line);
+      border-radius: 4px;
+      cursor: pointer;
+      transition: border-color 0.15s, transform 0.15s, background 0.15s;
     }
-
-    .player-card:hover {
-      background: var(--bg-card-hover);
-      border-color: var(--accent);
-      transform: translateX(4px);
-    }
-
+    .player-card:hover { border-color: var(--chalk-faint); background: var(--turf-1); transform: translateX(3px); }
     .player-card.selected {
-      border-color: var(--gold);
-      background: rgba(212, 175, 55, 0.08);
+      border-color: var(--brass);
+      background: var(--turf-1);
+      box-shadow: 0 0 0 1px var(--brass), 0 0 18px rgba(214, 165, 58, 0.35);
     }
 
-    .player-info { flex: 1; }
+    .player-info { flex: 1; min-width: 0; }
 
     .player-name {
-      font-family: 'Oswald', sans-serif;
-      font-size: 0.95rem;
-      font-weight: 600;
+      font-family: var(--font-board);
+      font-weight: 700;
+      font-size: 1.15rem;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      line-height: 1.1;
     }
 
-    .player-meta {
-      font-size: 0.72rem;
-      color: var(--text-secondary);
-      margin-top: 2px;
-    }
-
-    .player-pos {
-      font-family: 'Oswald', sans-serif;
-      font-size: 0.7rem;
-      letter-spacing: 1px;
-      padding: 2px 8px;
-      background: rgba(200, 16, 46, 0.15);
-      color: var(--accent);
-      border-radius: 4px;
-      white-space: nowrap;
-    }
+    .player-meta { font-size: 0.78rem; color: var(--chalk-dim); margin-top: 2px; }
 
     .player-stats {
       display: flex;
-      gap: 10px;
-      font-size: 0.65rem;
-      color: var(--text-muted);
-      margin-top: 3px;
       flex-wrap: wrap;
+      gap: 4px 12px;
+      margin-top: 4px;
+      font-family: var(--font-board);
+      font-weight: 600;
+      font-size: 0.78rem;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--chalk-faint);
     }
-
-    .player-stats span { color: var(--text-secondary); }
+    .player-stats span { color: var(--bulb); font-variant-numeric: tabular-nums; }
     .hidden-stats .player-stats { display: none; }
 
+    /* position chip = jersey number patch */
+    .player-pos {
+      flex-shrink: 0;
+      font-family: var(--font-varsity);
+      font-size: 0.85rem;
+      padding: 5px 9px;
+      background: var(--jersey);
+      color: var(--chalk);
+      border-radius: 3px;
+      box-shadow: inset 0 0 0 2px var(--jersey), inset 0 0 0 3px rgba(243, 240, 230, 0.6);
+      white-space: nowrap;
+    }
+
+    /* ---------- Depth chart (chalkboard) ---------- */
     .roster-section {
-      background: var(--bg-secondary);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 20px;
+      background-color: var(--slate);
+      background-image: radial-gradient(ellipse at 30% 20%, rgba(243, 240, 230, 0.05), transparent 60%);
+      border: 8px solid #5a3a22;
+      border-radius: 6px;
+      padding: 18px;
+      box-shadow: 0 14px 40px rgba(0, 0, 0, 0.45), inset 0 0 30px rgba(0, 0, 0, 0.4);
     }
 
     .roster-title {
-      font-family: 'Oswald', sans-serif;
-      font-size: 0.85rem;
-      letter-spacing: 3px;
-      text-transform: uppercase;
-      color: var(--text-muted);
+      font-family: var(--font-varsity);
+      font-size: 1.5rem;
+      letter-spacing: 2px;
       text-align: center;
-      margin-bottom: 12px;
+      color: var(--chalk);
+      margin-bottom: 10px;
+      padding-bottom: 10px;
+      border-bottom: 2px dashed var(--chalk-faint);
     }
 
     .roster-slot {
-      background: var(--bg-card);
-      border: 2px dashed var(--border);
-      border-radius: 8px;
-      padding: 10px 14px;
-      margin-bottom: 6px;
       display: flex;
       align-items: center;
-      gap: 12px;
-      min-height: 52px;
-      transition: all 0.3s;
+      gap: 14px;
+      min-height: 56px;
+      padding: 7px 10px;
+      border-bottom: 1px dashed var(--chalk-line);
+      border-radius: 4px;
       cursor: pointer;
+      transition: background 0.2s, box-shadow 0.2s;
     }
+    .roster-slot.highlight {
+      background: rgba(255, 182, 39, 0.1);
+      box-shadow: inset 0 0 0 2px var(--bulb);
+    }
+    .roster-slot.active { box-shadow: inset 0 0 0 2px var(--brass); }
 
-    .roster-slot.filled { border-style: solid; border-color: var(--border); }
-    .roster-slot.active { border-color: var(--gold); border-style: solid; box-shadow: 0 0 20px var(--gold-glow); }
-    .roster-slot.highlight { border-color: var(--accent); border-style: solid; }
-
+    /* X's and O's: offense in solid circles, defense dashed, specialists in squares */
     .slot-position {
-      font-family: 'Oswald', sans-serif;
-      font-size: 0.95rem;
-      font-weight: 700;
-      color: var(--text-muted);
-      width: 50px;
-      text-align: center;
+      flex-shrink: 0;
+      width: 42px;
+      height: 42px;
+      display: grid;
+      place-items: center;
+      font-family: var(--font-varsity);
+      font-size: 0.85rem;
+      color: var(--chalk-faint);
+      border: 2px solid var(--chalk-faint);
+      border-radius: 50%;
+      transition: color 0.2s, border-color 0.2s, background 0.2s;
     }
+    #slot-DL .slot-position, #slot-LB .slot-position, #slot-S .slot-position { border-style: dashed; }
+    #slot-K .slot-position, #slot-HC .slot-position { border-radius: 6px; }
 
-    .roster-slot.filled .slot-position { color: var(--gold); }
+    .roster-slot.filled .slot-position { color: var(--chalk); border-color: var(--chalk); }
+    .roster-slot.highlight .slot-position { color: var(--bulb); border-color: var(--bulb); }
 
-    .slot-player-info { flex: 1; }
+    .slot-player-info { flex: 1; min-width: 0; }
 
     .slot-empty {
-      font-size: 0.75rem;
-      color: var(--text-muted);
-      font-style: italic;
+      font-family: var(--font-board);
+      font-weight: 500;
+      font-size: 0.95rem;
+      letter-spacing: 1px;
+      color: var(--chalk-faint);
     }
 
     .slot-player-name {
-      font-family: 'Oswald', sans-serif;
-      font-size: 0.9rem;
-      font-weight: 600;
-    }
-
-    .slot-player-detail {
-      font-size: 0.7rem;
-      color: var(--text-secondary);
-    }
-
-    .strength-section {
-      margin-top: 16px;
-      padding-top: 16px;
-      border-top: 1px solid var(--border);
-    }
-
-    .strength-label {
-      font-family: 'Oswald', sans-serif;
-      font-size: 0.75rem;
-      letter-spacing: 3px;
+      font-family: var(--font-board);
+      font-weight: 700;
+      font-size: 1.15rem;
+      letter-spacing: 0.5px;
       text-transform: uppercase;
-      color: var(--text-muted);
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 8px;
+      line-height: 1.1;
     }
 
-    .strength-value { color: var(--gold); font-size: 1rem; }
+    .slot-player-detail { font-size: 0.78rem; color: var(--chalk-dim); }
 
-    .strength-bar {
-      height: 8px;
-      background: var(--bg-primary);
-      border-radius: 4px;
-      overflow: hidden;
-    }
-
-    .strength-fill {
-      height: 100%;
-      background: linear-gradient(90deg, var(--accent), var(--gold));
-      border-radius: 4px;
-      transition: width 0.5s ease;
-      width: 0%;
-    }
+    /* team stat totals as mini scoreboard tiles */
+    .strength-section { margin-top: 16px; }
 
     .stat-breakdown {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(4, minmax(0, 1fr));
       gap: 6px;
-      margin-top: 10px;
     }
 
     .stat-item {
       text-align: center;
-      padding: 6px 2px;
-      background: var(--bg-card);
-      border-radius: 6px;
+      padding: 7px 2px;
+      background: var(--board);
+      border: 1px solid var(--board-edge);
+      border-radius: 3px;
     }
 
     .stat-item-label {
-      font-size: 0.55rem;
-      letter-spacing: 1px;
+      font-family: var(--font-board);
+      font-weight: 600;
+      font-size: 0.68rem;
+      letter-spacing: 1.5px;
       text-transform: uppercase;
-      color: var(--text-muted);
+      color: var(--chalk-faint);
     }
 
     .stat-item-value {
-      font-family: 'Oswald', sans-serif;
-      font-size: 0.9rem;
-      color: var(--text-primary);
-      margin-top: 1px;
+      font-family: var(--font-board);
+      font-weight: 800;
+      font-size: 1.25rem;
+      color: var(--bulb);
+      text-shadow: 0 0 8px var(--bulb-glow);
+      font-variant-numeric: tabular-nums;
     }
 
+    /* brass trophy button */
     .simulate-btn {
       display: block;
       width: 100%;
-      padding: 14px;
       margin-top: 16px;
-      font-family: 'Oswald', sans-serif;
+      padding: 15px;
+      font-family: var(--font-varsity);
       font-size: 1.2rem;
-      font-weight: 700;
-      letter-spacing: 4px;
+      letter-spacing: 2px;
       text-transform: uppercase;
-      background: linear-gradient(135deg, var(--accent), #e8243c);
-      color: white;
+      color: var(--board);
+      background: linear-gradient(180deg, #f0c85a, var(--brass));
       border: none;
-      border-radius: 8px;
+      border-radius: 6px;
       cursor: pointer;
-      transition: all 0.3s;
-      box-shadow: 0 4px 25px var(--accent-glow);
+      box-shadow: 0 5px 0 var(--brass-deep);
+      transition: transform 0.12s, box-shadow 0.12s;
     }
+    .simulate-btn:hover:not(:disabled) { transform: translateY(-2px); }
+    .simulate-btn:active:not(:disabled) { transform: translateY(3px); box-shadow: 0 2px 0 var(--brass-deep); }
+    .simulate-btn:disabled { opacity: 0.35; cursor: not-allowed; }
 
-    .simulate-btn:hover:not(:disabled) {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 35px var(--accent-glow);
-    }
-
-    .simulate-btn:disabled { opacity: 0.3; cursor: not-allowed; }
-
-    .results-overlay {
+    /* ---------- Season sim + final score ---------- */
+    .sim-overlay, .results-overlay {
       display: none;
       position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0,0,0,0.85);
+      inset: 0;
       z-index: 100;
+      background: rgba(4, 9, 5, 0.9);
       justify-content: center;
       align-items: center;
-      padding: 20px;
+      flex-direction: column;
+      padding: max(20px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) max(20px, env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px));
+    }
+    .sim-overlay { z-index: 99; }
+    .sim-overlay.show, .results-overlay.show { display: flex; }
+
+    .sim-text {
+      font-family: var(--font-board);
+      font-weight: 700;
+      font-size: 1.1rem;
+      letter-spacing: 5px;
+      text-transform: uppercase;
+      color: var(--chalk-dim);
+      margin-bottom: 14px;
     }
 
-    .results-overlay.show { display: flex; }
+    .sim-record {
+      font-family: var(--font-board);
+      font-weight: 800;
+      font-size: clamp(5rem, 22vw, 9rem);
+      line-height: 1;
+      padding: 10px 36px;
+      color: var(--bulb);
+      text-shadow: 0 0 22px var(--bulb-glow);
+      background-color: #050605;
+      background-image: radial-gradient(rgba(255, 182, 39, 0.08) 1px, transparent 1.5px);
+      background-size: 6px 6px;
+      border: 4px solid var(--board-edge);
+      border-radius: 6px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .sim-week {
+      font-family: var(--font-varsity);
+      font-size: 1.1rem;
+      letter-spacing: 2px;
+      color: var(--chalk);
+      margin-top: 16px;
+      min-height: 1.4em;
+    }
 
     .results-card {
-      background: var(--bg-secondary);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 36px;
-      max-width: 540px;
       width: 100%;
-      text-align: center;
-      animation: resultSlide 0.5s ease;
+      max-width: 520px;
       max-height: 90vh;
       overflow-y: auto;
+      text-align: center;
+      background: var(--board);
+      border: 4px solid var(--board-edge);
+      border-radius: 6px;
+      padding: 28px 24px;
+      animation: resultIn 0.45s ease;
     }
-
-    @keyframes resultSlide {
-      from { transform: scale(0.8); opacity: 0; }
+    .results-card::before {
+      content: 'Final';
+      display: block;
+      font-family: var(--font-board);
+      font-weight: 800;
+      font-size: 0.95rem;
+      letter-spacing: 6px;
+      text-transform: uppercase;
+      color: var(--chalk-dim);
+      margin-bottom: 6px;
+    }
+    @keyframes resultIn {
+      from { transform: scale(0.9); opacity: 0.4; }
       to { transform: scale(1); opacity: 1; }
     }
 
     .result-record {
-      font-family: 'Oswald', sans-serif;
-      font-size: 5rem;
-      font-weight: 700;
+      font-family: var(--font-board);
+      font-weight: 800;
+      font-size: clamp(4.5rem, 18vw, 6.5rem);
       line-height: 1;
       margin-bottom: 8px;
+      color: var(--bulb);
+      text-shadow: 0 0 20px var(--bulb-glow);
+      font-variant-numeric: tabular-nums;
     }
-
-    .result-perfect { color: var(--gold); text-shadow: 0 0 40px var(--gold-glow); }
-    .result-great { color: var(--success); }
-    .result-good { color: var(--text-primary); }
-    .result-bad { color: var(--danger); }
+    .result-perfect { color: var(--brass); text-shadow: 0 0 26px rgba(214, 165, 58, 0.7); }
+    .result-great { color: var(--win); text-shadow: 0 0 18px rgba(127, 216, 144, 0.45); }
+    .result-good { color: var(--bulb); }
+    .result-bad { color: var(--loss); text-shadow: 0 0 18px rgba(255, 107, 94, 0.4); }
 
     .result-message {
-      font-family: 'Oswald', sans-serif;
-      font-size: 1.2rem;
-      letter-spacing: 3px;
-      text-transform: uppercase;
-      color: var(--text-secondary);
-      margin-bottom: 20px;
+      font-family: var(--font-varsity);
+      font-size: 1.15rem;
+      letter-spacing: 1px;
+      color: var(--chalk);
+      margin-bottom: 18px;
+      text-wrap: balance;
     }
 
     .result-roster { text-align: left; margin-bottom: 20px; }
 
     .result-player {
       display: flex;
-      justify-content: space-between;
-      padding: 6px 0;
-      border-bottom: 1px solid var(--border);
-      font-size: 0.85rem;
+      align-items: baseline;
+      gap: 10px;
+      padding: 7px 0;
+      border-bottom: 1px dashed var(--chalk-line);
     }
-
     .result-player:last-child { border-bottom: none; }
 
     .result-player-pos {
-      color: var(--gold);
-      font-family: 'Oswald', sans-serif;
-      width: 50px;
+      width: 38px;
+      flex-shrink: 0;
+      font-family: var(--font-varsity);
+      font-size: 0.85rem;
+      color: var(--bulb);
     }
 
-    .result-player-name { flex: 1; margin-left: 8px; }
-
-    .result-player-team {
-      color: var(--text-muted);
-      font-size: 0.75rem;
-    }
-
-    .result-strength {
-      font-family: 'Oswald', sans-serif;
-      font-size: 0.8rem;
-      letter-spacing: 2px;
-      color: var(--text-muted);
-      margin-bottom: 20px;
-    }
-
-    .result-strength span { color: var(--gold); font-size: 1.2rem; }
-
-    .play-again-btn {
-      padding: 14px 40px;
-      font-family: 'Oswald', sans-serif;
-      font-size: 1rem;
-      font-weight: 600;
-      letter-spacing: 3px;
-      text-transform: uppercase;
-      background: var(--accent);
-      color: white;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .play-again-btn:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 4px 20px var(--accent-glow);
-    }
-
-    .sim-overlay {
-      display: none;
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0,0,0,0.9);
-      z-index: 99;
-      justify-content: center;
-      align-items: center;
-      flex-direction: column;
-    }
-
-    .sim-overlay.show { display: flex; }
-
-    .sim-text {
-      font-family: 'Oswald', sans-serif;
-      font-size: 1.2rem;
-      letter-spacing: 4px;
-      text-transform: uppercase;
-      color: var(--text-secondary);
-      margin-bottom: 20px;
-    }
-
-    .sim-record {
-      font-family: 'Oswald', sans-serif;
-      font-size: 4rem;
+    .result-player-name {
+      flex: 1;
+      min-width: 0;
+      font-family: var(--font-board);
       font-weight: 700;
-      color: var(--text-primary);
+      font-size: 1.05rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
 
-    .sim-week {
-      font-family: 'Oswald', sans-serif;
-      font-size: 0.9rem;
-      color: var(--text-muted);
-      letter-spacing: 2px;
-      margin-top: 8px;
-    }
+    .result-player-team { font-size: 0.78rem; color: var(--chalk-dim); text-align: right; }
 
-    .start-screen {
-      text-align: center;
-      padding: 50px 20px;
-    }
+    .result-strength:empty { display: none; }
 
-    .start-screen .logo { font-size: 7rem; }
+    .play-again-btn { padding: 13px 40px; font-size: 1.1rem; }
+
+    /* ---------- Start screen ---------- */
+    .start-screen { text-align: center; padding-block: 48px 20px; }
+    .start-screen .logo { font-size: clamp(5rem, 18vw, 8.5rem); text-shadow: 4px 4px 0 var(--jersey), 9px 9px 0 var(--board); }
 
     .start-desc {
-      max-width: 520px;
-      margin: 20px auto;
-      color: var(--text-secondary);
-      line-height: 1.7;
-      font-size: 0.95rem;
+      max-width: 34rem;
+      margin: 22px auto 0;
+      color: var(--chalk-dim);
+      line-height: 1.65;
+      font-size: 1.02rem;
+      text-wrap: pretty;
     }
 
-    .start-btn {
-      display: inline-block;
-      padding: 16px 60px;
-      margin-top: 30px;
-      font-family: 'Oswald', sans-serif;
-      font-size: 1.3rem;
-      font-weight: 600;
-      letter-spacing: 5px;
-      text-transform: uppercase;
-      background: var(--accent);
-      color: white;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: all 0.3s;
-      box-shadow: 0 4px 30px var(--accent-glow);
-    }
-
-    .start-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 40px var(--accent-glow);
-    }
+    .start-btn { display: inline-block; margin-top: 28px; padding: 16px 64px; font-size: 1.6rem; }
 
     .how-to-play {
       max-width: 600px;
       margin: 40px auto 0;
       text-align: left;
+      background-color: var(--slate);
+      border: 8px solid #5a3a22;
+      border-radius: 6px;
+      padding: 22px 22px 10px;
+      box-shadow: 0 14px 40px rgba(0, 0, 0, 0.45), inset 0 0 30px rgba(0, 0, 0, 0.4);
     }
 
     .how-to-play h3 {
-      font-family: 'Oswald', sans-serif;
-      font-size: 0.85rem;
-      letter-spacing: 4px;
-      text-transform: uppercase;
-      color: var(--text-muted);
-      margin-bottom: 16px;
+      font-family: var(--font-varsity);
+      font-weight: 400;
+      font-size: 1.4rem;
+      letter-spacing: 2px;
       text-align: center;
+      color: var(--chalk);
+      margin-bottom: 16px;
+      padding-bottom: 10px;
+      border-bottom: 2px dashed var(--chalk-faint);
     }
 
-    .step {
-      display: flex;
-      gap: 16px;
-      margin-bottom: 14px;
-      align-items: flex-start;
-    }
+    .step { display: flex; gap: 14px; align-items: center; margin-bottom: 14px; }
 
     .step-num {
-      font-family: 'Oswald', sans-serif;
-      font-size: 1.4rem;
-      font-weight: 700;
-      color: var(--accent);
-      min-width: 30px;
+      flex-shrink: 0;
+      width: 36px;
+      height: 36px;
+      display: grid;
+      place-items: center;
+      font-family: var(--font-varsity);
+      font-size: 1rem;
+      color: var(--chalk);
+      border: 2px solid var(--chalk);
+      border-radius: 50%;
     }
 
-    .step-text {
-      color: var(--text-secondary);
-      font-size: 0.9rem;
-      line-height: 1.5;
-    }
-
-    .step-text strong { color: var(--text-primary); }
+    .step-text { color: var(--chalk-dim); font-size: 0.98rem; line-height: 1.5; }
+    .step-text strong { color: var(--chalk); }
 
     .hidden { display: none !important; }
 
     .footer-link {
       text-align: center;
-      padding: 30px 0;
-      font-size: 0.75rem;
-      color: var(--text-muted);
+      padding-block: 30px;
+      font-family: var(--font-board);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      font-size: 0.8rem;
+      color: var(--chalk-faint);
+      position: relative;
+      z-index: 1;
+    }
+    .footer-link a { color: var(--chalk-dim); }
+    .footer-link a:hover { color: var(--chalk); }
+
+    @media (max-width: 480px) {
+      .slot-content { font-size: 1.15rem; }
+      .player-name, .slot-player-name { font-size: 1.02rem; }
+      .roster-section, .how-to-play { border-width: 6px; padding: 14px; }
+      .slot-section { padding: 14px; }
     }
 
-    .footer-link a {
-      color: var(--text-muted);
-      text-decoration: none;
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation: none !important; transition: none !important; }
     }
-
-    .footer-link a:hover { color: var(--text-secondary); }
   </style>
 </head>
 <body>
@@ -752,7 +720,7 @@
       </p>
       <button class="start-btn" onclick="startGame()">Play</button>
       <div class="how-to-play">
-        <h3>How to Play</h3>
+        <h3>Game Plan</h3>
         <div class="step">
           <div class="step-num">1</div>
           <div class="step-text"><strong>Spin</strong> the slot machine to get a random college program and decade.</div>
@@ -826,7 +794,7 @@
 
       <!-- Right: Roster -->
       <div class="roster-section">
-        <div class="roster-title">Your Roster</div>
+        <div class="roster-title">Depth Chart</div>
 
         <div class="roster-slot" id="slot-QB" onclick="selectSlot('QB')">
           <div class="slot-position">QB</div>
@@ -911,7 +879,7 @@
 
   <!-- Simulation Overlay -->
   <div class="sim-overlay" id="simOverlay">
-    <div class="sim-text">Simulating Season...</div>
+    <div class="sim-text">Simulating the season</div>
     <div class="sim-record" id="simRecord">0-0</div>
     <div class="sim-week" id="simWeek"></div>
   </div>
