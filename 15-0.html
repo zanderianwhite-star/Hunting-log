@@ -3597,11 +3597,11 @@ function simulate() {
   const total = pass+rush+recv+passD+rushD+kick+coach;
   const rating = Math.min(100, (total / MAX_STRENGTH) * 100);
 
-  // Win chance per regular-season game. Even a 100-rated team tops out at 94%,
+  // Win chance per regular-season game. Even a 100-rated team tops out at 96%,
   // and a great coach or kicker adds only a little.
-  let baseWinPct = 0.30 + (rating - 50) * 0.0135;
+  let baseWinPct = 0.32 + (rating - 50) * 0.0135;
   baseWinPct += Math.max(0, coach - 75) * 0.001 + Math.max(0, kick - 75) * 0.0005;
-  baseWinPct = Math.max(0.15, Math.min(0.94, baseWinPct));
+  baseWinPct = Math.max(0.15, Math.min(0.96, baseWinPct));
 
   let wins=0, losses=0, gameNum=0;
 
@@ -3613,9 +3613,9 @@ function simulate() {
     }
     gameNum++;
     // Playoff games get harder, and every opponent varies a little.
-    const difficulty = gameNum === 15 ? 0.90 : gameNum === 14 ? 0.92 : gameNum === 13 ? 0.95 : 1.0;
+    const difficulty = gameNum === 15 ? 0.94 : gameNum === 14 ? 0.95 : gameNum === 13 ? 0.97 : 1.0;
     const opponent = 0.97 + Math.random() * 0.06;
-    const winPct = Math.min(0.96, baseWinPct * difficulty * opponent);
+    const winPct = Math.min(0.975, baseWinPct * difficulty * opponent);
     if (Math.random() < winPct) wins++; else losses++;
 
     document.getElementById('simRecord').textContent = `${wins}-${losses}`;
