@@ -3346,14 +3346,30 @@ function startGame() {
   updateSkipButtons();
 }
 
+// Spins favor powerhouse programs and recent decades.
+const TEAM_WEIGHT = {
+  "Alabama": 4, "Ohio State": 4, "Georgia": 4, "Clemson": 3.5, "LSU": 3.5, "Oklahoma": 3.5,
+  "Michigan": 3.5, "Texas": 3, "USC": 3, "Notre Dame": 3, "Florida State": 3, "Oregon": 3,
+  "Florida": 3, "Penn State": 3, "Miami (FL)": 3,
+  "Auburn": 2, "Tennessee": 2, "Nebraska": 2, "Texas A&M": 2, "Wisconsin": 2,
+  "Michigan State": 1, "Ole Miss": 1, "Colorado": 1, "Pittsburgh": 1, "Virginia Tech": 1
+};
+const DECADE_WEIGHT = { "1980s": 1, "1990s": 1.5, "2000s": 2, "2010s": 3.5, "2020s": 3.5 };
+const USED_DECADE_FACTOR = 0.5; // a decade you've already drafted from is half as likely
+
+function weightedPick(items, weightOf) {
+  const weights = items.map(weightOf);
+  let r = Math.random() * weights.reduce((a, b) => a + b, 0);
+  for (let i = 0; i < items.length; i++) { r -= weights[i]; if (r < 0) return items[i]; }
+  return items[items.length - 1];
+}
+
 function getRandomTeam() {
-  return TEAMS[Math.floor(Math.random() * TEAMS.length)];
+  return weightedPick(TEAMS, t => TEAM_WEIGHT[t] || 1);
 }
 
 function getRandomDecade() {
-  const available = DECADES.filter(d => !usedDecades.includes(d));
-  if (available.length === 0) return DECADES[Math.floor(Math.random() * DECADES.length)];
-  return available[Math.floor(Math.random() * available.length)];
+  return weightedPick(DECADES, d => (DECADE_WEIGHT[d] || 1) * (usedDecades.includes(d) ? USED_DECADE_FACTOR : 1));
 }
 
 function spin() {
